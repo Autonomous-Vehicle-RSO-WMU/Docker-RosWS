@@ -4,6 +4,17 @@
 # MAYBE THIS INSTEAD: "sudo docker run -it --rm   -v $(pwd)/src:/workspace/src   --device=/dev/serial/by-id/usb-Arduino__www.arduino.cc__0042_03536373332351C06150-if00   ros2_workspace"
 # 3. "source install/setup.bash"
 
+# Steps to open image in adjacent terminal:
+# 1. "sudo docker ps" and copy name under NAMES
+# 2. sudo docker exec -it <name> bash
+
+# Steps to drive robot
+# 1. "ros2 launch my_robot_description diffdrive_physical.launch.py"
+# 2. !!!!!!!!!!! READ THIS !!!!!!!!!!! REDUCE SPEED TO ZERO BEFORE DRIVING !!!!!!!!!!! READ THIS !!!!!!!!!!!
+# 3. In a seperate terminal running the docker image: "ros2 run teleop_twist_keyboard teleop_twist_keyboard"
+# 4. drive (:
+
+
 # Use the official ROS 2 Humble base image
 FROM ros:humble
 
