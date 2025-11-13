@@ -9,8 +9,14 @@ setup(
     data_files=[
         ('share/ament_index/resource_index/packages', ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        ('share/' + package_name + '/launch', ['launch/spawn_and_perception.launch.py']),
-        ('share/' + package_name + '/config', ['config/rviz.rviz']),
+        ('share/' + package_name + '/launch', [
+            'launch/spawn_and_perception.launch.py',
+            'launch/nav2.launch.py'
+        ]),
+        ('share/' + package_name + '/config', [
+            'config/rviz.rviz',
+            'config/nav2_params.yaml'
+        ]),
         ('share/' + package_name + '/data', ['data/waypoints.csv']),
     ],
     install_requires=['setuptools'],

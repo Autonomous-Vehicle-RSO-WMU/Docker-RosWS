@@ -1,0 +1,161 @@
+# Configured for a MAPLESS setup, using odom frame
+
+# --- Local Costmap Parameters ---
+local_costmap:
+  ros__parameters:
+    # --- Basic Config ---
+    global_frame: odom      # Map origin (Mapless: Use odom as the global frame, odom is wherever robot first started.)
+    robot_base_frame: hero  # Base coordinate frame (physically moves w/ robot, frame hero is robot)
+    rolling_window: true    # Rolling costmap (Local costmap always rolls (moves to follow robot). So costmap will stay centered on hero)
+    width: 10               # Width of costmap
+    height: 10              # Height of costmap
+    resolution: 0.1         # Cell/pixel size (meters)
+
+    # --- Plugins ---
+    # Defines layers that will be used to build the local costmap
+
+    plugins: ["obstacle_layer", "inflation_layer"]  # Master list of layers (We only need to check for dynamic obstacles in the local plan)
+    
+    # --- Obstacle Layer ---
+    # Adds all raw sensor data
+    # Takes sensor data, and mark cells on map as "lethal obstacles"
+    obstacle_layer:
+      plugin: "nav2_costmap_2d::ObstacleLayer"  # Standard obstacle layer plugin for sensor data
+      observation_sources: "fused_cloud"        # List of sensor/s for layer to listen to
+      # --- Fused Cloud Config ---
+      fused_cloud:
+        # --- Subcription Topic ---
+        topic: "/carla/hero/fused_objects"  # topic from sensor_fusion.py
+        data_type: "PointCloud2"            # Expected data type for layer to recieve (PointCloud2 or LaserScan)
+        sensor_frame: "hero"                # Frame that sensor data is relative to
+        obstacle_max_range: 20.0            # Max obstacle detection range
+        obstacle_min_range: 0.1             # Min obstacle detection range
+
+    # --- Inflation Layer ---
+    # Adds a buffer zone around obstacles on costmap
+    inflation_layer:
+      plugin: "nav2_costmap_2d::InflationLayer"  # Standard inflation layer plugin 
+      cost_scaling_factor: 3.0                   # Steepness of cost to be within buffer (lower=gentler slope, higher=steeper slope. 3.0 is a moderate value)
+      inflation_radius: 0.5                      # Size of safety buffer
+    
+    always_send_full_costmap: True  # Publish entire grid each update (v.s. only change. less efficient, better for debugging)
+
+# --- Global Costmap Parameters ---
+# Same as params for local costmap, with slight differences in measurements
+global_costmap:
+  ros__parameters:
+    # --- Basic Config ---
+    global_frame: odom
+    robot_base_frame: hero
+    rolling_window: true
+    width: 200              # Different than in local costmap params       
+    height: 200             # Different than in local costmap params
+    resolution: 0.2         # Different than in local costmap params
+
+    # --- Plugins ---
+    # Due to IGVC 2026 Rules (no map memorization), global map will ALSO be built from our sensor data
+    plugins: ["obstacle_layer", "inflation_layer"]
+    
+    # --- Obstacle Layer ---
+    obstacle_layer:
+      plugin: "nav2_costmap_2d::ObstacleLayer"
+      observation_sources: "fused_cloud"
+      fused_cloud:
+        topic: "/carla/hero/fused_objects"
+        data_type: "PointCloud2"
+        sensor_frame: "hero"
+        obstacle_max_range: 50.0            # Different than in local costmap params
+        obstacle_min_range: 0.1
+    
+    # --- Inflation Layer ---
+    inflation_layer:
+      plugin: "nav2_costmap_2d::InflationLayer"
+      cost_scaling_factor: 3.0
+      inflation_radius: 0.5
+
+    always_send_full_costmap: True
+
+# --- Planner Server Parameters ---
+planner_server:
+  ros__parameters:
+    # --- Planner Plugins ---
+    plugins: ["GridBased"]  # Planner plugin/s list
+    # --- GridBased Plugin ---
+    GridBased:
+      plugin: "nav2_navfn_planner::NavFnPlanner"  # NavFnPlanner (uses an algorithm based on A*
+      tolerance: 0.5  # Search tolerance radius (Acceptable area around original waypoint for planner to select new waypoint, incase obstructed)
+
+# --- Controller Server Parameters ---
+controller_server:
+  ros__parameters:
+    # --- Controller Plugins ---
+    plugins: ["RPP"]  # Controller plugin/s list
+    # --- RPP Plugin ---
+    RPP:
+      plugin: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController" # RegulatedPurePursuitController, outputs for AckermannDrive robot
+      
+      # --- Subscription Topics ---
+      odom_topic: "/carla/hero/odometry"          # Odometry topic, will read robots current position & speed
+      # --- Publishing Topics ---
+      command_topic: "/carla/hero/ackermann_cmd"  # Command topic, will publish steering and speed commands to
+      
+      # --- Vehicle Model & Algorithm Tuning ---
+      wheel_base: 1.63                            # Distance between front & rear axles
+      #lookahead_dist: 6.0                        # Distance controller "looks ahead" to calclate steering distance (UNUSED W/ VELOCITY SCALED LOOK AHEAD)
+      use_velocity_scaled_lookahead_dist: true    # Automatically adjust lookahead distance based on speed
+      lookahead_time: 1.5                         # "gain" in seconds for velocity scaling
+      min_lookahead_dist: 3.0                     # Min look ahead distance
+      max_lookahead_dist: 10.0                    # Max look ahead distance
+      max_robot_pose_search_dist: 10.0            # Safety distance robot can go off path before stopping controller
+      
+      # --- Control Output & Safety Limits ---
+      desired_linear_vel: 2.2                     # Target speed (m/s)
+      max_steering_angle: 0.785                   # Max physical steering angle (radians)
+      steering_angle_velocity: 0.5                # Max speed steering angle can change (radians/second)
+      xy_goal_tolerance: 0.5                      # How close robot needs to get to waypoint coordinate for success
+
+# --- Behavior Server Parameters ---
+# Contains simple non planning actions robot can perform
+# Will be loaded by behavior_server node
+behavior_server:
+  ros__parameters:
+  # --- Behavior Plugins ---
+    plugins: ["spin", "wait"]
+    # --- Spin Plugin ---
+    spin:
+      plugin: "nav2_behaviors::Spin"  # Spin algorithm (Robot will spin in a circle, can be used to clear costmaps or try and re localize)
+    # --- Wait Plugin ---
+    wait:
+      plugin: "nav2_behaviors::Wait"  # Wait algorithm (Robot will pause and wait for specified duration)
+
+# --- Behavior Tree Navigator Parameters ---
+# Brain/manager of entire NAV2 system
+bt_navigator:
+  ros__parameters:
+    global_frame: odom
+    robot_base_frame: hero
+    # --- Behavior Tree Skills ---
+    # Nodes or "skills" behavior tree is allowed to use
+    plugin_lib_names:
+    - nav2_compute_path_to_pose_action_bt_node  # Calls planner_server to compute a path
+    - nav2_follow_path_action_bt_node           # Calls controller_server to follow path made by planner
+    - nav2_spin_action_bt_node                  # Calls behavior_server to perform spin behavior
+    - nav2_wait_action_bt_node                  # Calls behavior_server to perform wait behavior
+
+# --- Smoother Server Parameters ---
+# Smoothes path created by planner_server
+smoother_server:
+  ros__parameters:
+    use_smoother: false   # Smoother Toggle (Currently off for simplicity)
+    # --- Smoother Plugins ---
+    smoother_plugins: []
+
+# --- Waypoint Follower Parameters ---
+waypoint_follower:
+  ros__parameters:
+    loop_rate: 20           # How fast waypoint follower checks its status (Hz)
+    stop_on_failure: false  # If robot fails to reach waypoint, it will move on and continue with the next
+    # --- Action Plugins ---
+    # Plugins waypoint follower can execute when arriving at waypoint
+    plugin_lib_names:
+    - nav2_waypoint_follower_wait_at_waypoint_plugin  # Wait at waypoint plugin (default no wait time, can specify for each waypoint)

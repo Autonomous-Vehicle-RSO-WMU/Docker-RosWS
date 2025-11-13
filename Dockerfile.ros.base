@@ -30,6 +30,8 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
       ros-humble-sensor-msgs-py \
       ros-humble-cv-bridge \
       python3-colcon-common-extensions python3-rosdep \
+      ros-humble-navigation2 \
+      ros-humble-nav2-bringup \
       && rm -rf /var/lib/apt/lists/*
 
 RUN rosdep init || true && rosdep update
