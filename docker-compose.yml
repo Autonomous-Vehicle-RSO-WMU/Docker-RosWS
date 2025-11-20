@@ -46,13 +46,7 @@ services:
     command: >-
       bash -c "echo 'Waiting for CARLA port...'; \
       for i in $(seq 1 30); do (echo > /dev/tcp/127.0.0.1/2000) && break || sleep 1; done; \
-      # Start multiple Python nodes directly (background) then wait/attach: \
-      python -m av_sim_core.spawn_actors & \
-      python -m av_sim_core.sensor_fusion & \
-      python -m av_sim_core.vision_detector & \
-      python -m av_sim_core.pure_pursuit & \
-      python -m av_sim_core.stop_controller & \
-      wait"
+      ros2 launch av_sim_core nav2.launch.py"
 
 volumes: {}
 
