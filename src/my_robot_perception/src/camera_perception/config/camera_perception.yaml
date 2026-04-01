@@ -1,0 +1,30 @@
+# Camera perception node configuration (2D-only).
+# Publishes Detection2DArray — fusion node handles 3D via LiDAR projection.
+
+camera_perception_node:
+  ros__parameters:
+    frames:
+      camera_frame: zed_left_camera_optical_frame
+
+    topics:
+      camera_image: /zed/zed_node/left/image_rect_color
+      detections2d_out: /camera/detections2d
+      debug_image_out: /camera/debug_image
+
+    # Detector backend configuration (YOLOv8 for road hazard detection)
+    detector:
+      enabled: true
+      model_name: best.engine
+      confidence_threshold: 0.45
+      iou_threshold: 0.45
+      # device: '0' uses the Jetson Orin GPU (requires NVIDIA L4T PyTorch wheel).
+      # Change to 'cpu' if using the standard PyPI torch wheel.
+      device: '0'
+      img_size: 640      # must match training imgsz (model was trained at 640)
+      max_det: 50
+      frame_skip: 1      # process every frame; increase to 2 if CPU inference is used
+
+    output:
+      publish_debug_image: true
+      label_font_scale: 0.7
+      label_thickness: 2

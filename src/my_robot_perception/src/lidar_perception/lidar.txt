@@ -1,0 +1,9 @@
+source /opt/ros/humble/setup.bash
+cd /home/jack/perception_ws
+colcon build --packages-select lidar_perception
+source /home/jack/perception_ws/install/setup.bash
+source /home/jack/perception_ws/install/lidar_perception/share/lidar_perception/local_setup.bash
+
+ros2 launch lidar_perception ouster_rviz.launch.py \
+  sensor_hostname:=192.168.1.69 \
+  udp_dest:=192.168.1.134

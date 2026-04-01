@@ -104,8 +104,8 @@
     {
         "azimuth_window": 
         [
-            0,
-            360000
+            135000,
+            225000
         ],
         "columns_per_packet": 16,
         "lidar_mode": "1024x10",
@@ -125,8 +125,8 @@
         "sync_pulse_out_pulse_width": 10,
         "timestamp_mode": "TIME_FROM_INTERNAL_OSC",
         "udp_dest": "192.168.1.69",
-        "udp_port_imu": 32990,
-        "udp_port_lidar": 37747,
+        "udp_port_imu": 56578,
+        "udp_port_lidar": 56931,
         "udp_profile_imu": "LEGACY",
         "udp_profile_lidar": "RNG19_RFL8_SIG16_NIR16"
     },
@@ -156,8 +156,8 @@
     {
         "column_window": 
         [
-            0,
-            1023
+            384,
+            640
         ],
         "columns_per_frame": 1024,
         "columns_per_packet": 16,
@@ -232,7 +232,7 @@
         "build_date": "2023-04-26T04:19:10Z",
         "build_rev": "v2.5.1",
         "image_rev": "ousteros-image-prod-aries-v2.5.1+20230426041400",
-        "initialization_id": 7109747,
+        "initialization_id": 8247308,
         "prod_line": "OS-2-32-U1",
         "prod_pn": "840-103576-06",
         "prod_sn": "992209000435",

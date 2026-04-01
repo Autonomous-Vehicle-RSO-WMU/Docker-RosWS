@@ -1,0 +1,16 @@
+# ZED SDK OD adapter node configuration.
+# Converts zed_msgs/ObjectsStamped → vision_msgs/Detection2DArray
+# so the fusion node can match LiDAR 3D boxes against 2D detections.
+
+zed_od_adapter_node:
+  ros__parameters:
+    frames:
+      camera_frame: zed_left_camera_optical_frame
+
+    topics:
+      zed_objects: /zed/zed_node/obj_det/objects
+      detections2d_out: /camera/detections2d
+
+    filter:
+      min_confidence: 0.30        # ZED reports 1-99; this is after /100 normalisation
+      require_tracking_ok: false   # set true to only accept tracking_state == 1

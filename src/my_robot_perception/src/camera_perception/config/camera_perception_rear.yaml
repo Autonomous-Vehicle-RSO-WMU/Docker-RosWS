@@ -1,0 +1,28 @@
+# Camera perception node configuration — REAR camera (ZED 2i).
+# Publishes Detection2DArray — fusion node handles 3D via LiDAR projection.
+
+camera_perception_node_rear:
+  ros__parameters:
+    frames:
+      camera_frame: zed_rear_left_camera_optical_frame
+
+    topics:
+      camera_image: /zed_rear/zed_node/left/image_rect_color
+      detections2d_out: /camera_rear/detections2d
+      debug_image_out: /camera_rear/debug_image
+
+    # Detector backend configuration (YOLOv8 for road hazard detection)
+    detector:
+      enabled: true
+      model_name: best.engine
+      confidence_threshold: 0.45
+      iou_threshold: 0.45
+      device: '0'
+      img_size: 640
+      max_det: 50
+      frame_skip: 1
+
+    output:
+      publish_debug_image: true
+      label_font_scale: 0.7
+      label_thickness: 2
