@@ -1,24 +1,23 @@
 <package format="3">
-  <name>fusion_node</name>
+  <name>lidar_perception</name>
   <version>0.0.1</version>
-  <description>LiDAR-camera fusion node (association + gating + visualization) extracted from camera_gated_clustering.</description>
+  <description>LiDAR perception node (clustering + 3D detections) extracted from camera_gated_clustering.</description>
   <maintainer email="todo@example.com">TODO_MAINTAINER</maintainer>
   <license>TODO_LICENSE</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
-  <buildtool_depend>ament_cmake_python</buildtool_depend>
 
-  <depend>rclpy</depend>
+  <depend>rclcpp</depend>
   <depend>sensor_msgs</depend>
   <depend>vision_msgs</depend>
-  <depend>fusion_msgs</depend>
   <depend>std_msgs</depend>
   <depend>geometry_msgs</depend>
-  <depend>visualization_msgs</depend>
   <depend>tf2_ros</depend>
-  <depend>message_filters</depend>
-  <depend>cv_bridge</depend>
+  <depend>visualization_msgs</depend>
+  <depend>pcl_conversions</depend>
+  <depend>pcl_ros</depend>
 
+  <exec_depend>ouster_ros</exec_depend>
   <exec_depend>ros2launch</exec_depend>
 
   <export>

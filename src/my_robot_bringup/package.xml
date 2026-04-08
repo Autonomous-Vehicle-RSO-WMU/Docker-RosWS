@@ -17,7 +17,8 @@
   <exec_depend>launch</exec_depend>
   <exec_depend>launch_ros</exec_depend>
   <exec_depend>my_robot_description</exec_depend>
-  <exec_depend>my_robot_gazebo</exec_depend>
+  <!-- my_robot_gazebo has COLCON_IGNORE — excluded from robot build -->
+  <!-- <exec_depend>my_robot_gazebo</exec_depend> -->
 
   <export>
     <build_type>ament_cmake</build_type>
