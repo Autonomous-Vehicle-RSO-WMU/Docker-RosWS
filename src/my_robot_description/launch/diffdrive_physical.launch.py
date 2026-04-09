@@ -66,6 +66,12 @@ def generate_launch_description():
         arguments=['joint_broad', '--controller-manager', '/controller_manager'],
     )
 
+    imu_broad_spawner = Node(
+        package='controller_manager',
+        executable='spawner',
+        arguments=['imu_broad', '--controller-manager', '/controller_manager'],
+    )
+
     delay_diff_drive_spawner_after_joint_broad_spawner = RegisterEventHandler(
         event_handler = OnProcessExit(
             target_action = joint_broad_spawner,
@@ -86,6 +92,7 @@ def generate_launch_description():
         control_node,
         rsp_launch,
         joint_broad_spawner,
+        imu_broad_spawner,
         delay_diff_drive_spawner_after_joint_broad_spawner,
         twist_stamper,
     ])

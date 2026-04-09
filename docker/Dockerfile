@@ -1,6 +1,6 @@
 # Steps to build:
 # 1. "sudo docker build -f docker/Dockerfile -t ros2_workspace ."
-# 2. "sudo docker run -it --rm --runtime nvidia --device=/dev/serial/by-id/usb-Arduino__www.arduino.cc__0042_03536373332351C06150-if00 ros2_workspace"
+# 2. "sudo docker run -it --rm --runtime nvidia --device=/dev/serial/by-id/usb-Arduino__www.arduino.cc__0042_03536373332351C06150-if00 --device=/dev/serial/by-id/usb-Arduino__www.arduino.cc__0043_55936343833351518161-if00 ros2_workspace"
 # 3. "source install/setup.bash"
 
 # Steps to open image in adjacent terminal:
@@ -66,6 +66,8 @@ RUN apt-get update && apt-get install -y \
     ros-humble-ros2-control \
     ros-humble-ros2-controllers \
     ros-humble-controller-manager \
+    ros-humble-ros2cli-common-extensions \
+    ros-humble-tf2 \
     && rm -rf /var/lib/apt/lists/*
 
 # Initialize rosdep (skip if already done in base image)

@@ -12,7 +12,9 @@ find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
 find_package(PkgConfig REQUIRED)
+find_package(tf2 REQUIRED)
 pkg_check_modules(SERIAL REQUIRED libserial)
+
 
 # Build the hardware interface shared library
 add_library(${PROJECT_NAME} SHARED
@@ -29,6 +31,7 @@ ament_target_dependencies(${PROJECT_NAME}
   pluginlib
   rclcpp
   rclcpp_lifecycle
+  tf2
 )
 
 # Export the plugin description so ros2_control can find it
@@ -58,5 +61,5 @@ if(BUILD_TESTING)
 endif()
 
 ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
-ament_export_dependencies(hardware_interface pluginlib rclcpp rclcpp_lifecycle)
+ament_export_dependencies(hardware_interface pluginlib rclcpp rclcpp_lifecycle tf2)
 ament_package()

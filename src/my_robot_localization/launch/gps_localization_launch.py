@@ -16,8 +16,14 @@ def generate_launch_description():
 	config_file_path = os.path.join(package_share_dir, 'config', 'ekf_config.yaml')
 	
 	# Launch configurations.
+	use_sim_time = LaunchConfiguration('use_sim_time')
 	
 	# Launch arguments.
+	sim_time_arg = DeclareLaunchArgument(
+            'use_sim_time',
+            default_value='false',
+            description='Use sim time if true'
+        )
 	
 	# Actions.
 	# Start navsat transform node.
@@ -26,9 +32,9 @@ def generate_launch_description():
 		executable = 'navsat_transform_node',
 		name = 'navsat_transform',
 		output = 'screen',
-		parameters = [config_file_path, {'use_sim_time': True}], # Change to a variable later.
+		parameters = [config_file_path, {'use_sim_time': use_sim_time}], # Change to a variable later.
 		remappings = [
-			('imu/data', 'imu/data'),
+			('imu/data', 'imu_broad/imu'),
 			('gps/fix', 'gps/fix'),
 			('gps/filtered', 'gps/filtered'),
 			('odometry/gps', 'odometry/gps'),
@@ -42,7 +48,7 @@ def generate_launch_description():
 		executable = 'ekf_node',
 		name = 'ekf_filter_node_map',
 		output = 'screen',
-		parameters = [config_file_path, {'use_sim_time': True}], # Change to a variable later.
+		parameters = [config_file_path, {'use_sim_time': use_sim_time}], # Change to a variable later.
 		remappings = [
 			('odometry/filtered', 'odometry/global'),
 			('/set_pose', '/initialpose')
@@ -55,7 +61,7 @@ def generate_launch_description():
 		executable = 'ekf_node',
 		name = 'ekf_filter_node_odom',
 		output = 'screen',
-		parameters = [config_file_path, {'use_sim_time': True}], # Change to a variable later.
+		parameters = [config_file_path, {'use_sim_time': use_sim_time}], # Change to a variable later.
 		remappings = [
 			('odometry/filtered', 'odometry/local'),
 			('/set_pose', '/initialpose')
@@ -63,6 +69,7 @@ def generate_launch_description():
 	)
 	
 	return LaunchDescription([
+		sim_time_arg,
 		navsat_transform,
 		robot_localization_global,
 		robot_localization_local

@@ -24,13 +24,14 @@ def generate_launch_description():
     # Define the main NAV2 launch file (bringup_launch.py), with custom launch arguments
     nav2_bringup_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(nav2_bringup_share_dir, 'launch', 'bringup_launch.py')
+            os.path.join(nav2_bringup_share_dir, 'launch', 'navigation_launch.py')
         ),
         launch_arguments={
             'params_file': nav2_params_file,
-            'use_map_server': use_map_server,
-            'use_amcl': use_amcl,
-            'use_sim_time': use_sim_time
+            # 'use_map_server': use_map_server,
+            # 'use_amcl': use_amcl,
+            'use_sim_time': use_sim_time,
+            # 'map': '',
         }.items(),
     )
 
