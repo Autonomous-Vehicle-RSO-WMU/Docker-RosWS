@@ -16,7 +16,7 @@
 
 
 # Use the official ROS 2 Humble base image
-FROM ros:humble
+FROM ros:humble-ros-base
 
 # Set environment variables
 ENV LANG=C.UTF-8 \

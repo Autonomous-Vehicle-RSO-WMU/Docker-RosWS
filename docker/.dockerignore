@@ -41,6 +41,7 @@ build/
 dist/
 *.egg-info/
 saved_images/
+./my_robot_description
 
 # Ignore build artifacts
 install/
