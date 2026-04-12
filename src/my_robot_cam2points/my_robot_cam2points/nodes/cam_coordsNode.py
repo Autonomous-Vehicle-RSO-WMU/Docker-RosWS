@@ -7,7 +7,8 @@ from sensor_msgs.msg import NavSatFix,PointCloud2,PointField
 from std_msgs.msg import Float32
 from vision_msgs.msg import Detection2D
 import struct
-#from yolop_lane_ros2.msg import LaneData
+from yolop_lane_ros2.msg import LaneData
+
 
 #These are the functions that will be used by the node to make Camera to Coords.
 #The node has not been created to allow me to accomodate to subscribing to the nodes to get depth and lane line data
@@ -44,12 +45,12 @@ class cam_coordsNode(Node):
             self.gpscallback,
             10
         )
-        # self.lanedetectionsubscription = self.create_subscription(
-        #     LaneData,          # message type we're receiving
-        #     'overlay_data',          # no topic name because no working node yet
-        #     self.camLane_callback,  # callback when message arrives
-        #     10                  # queue size / history depth
-        # )
+        self.lanedetectionsubscription = self.create_subscription(
+            LaneData,          # message type we're receiving
+            'overlay_data',          # no topic name because no working node yet
+            self.camLane_callback,  # callback when message arrives
+            10                  # queue size / history depth
+        )
         
 
         self.cam2dsubscription=self.create_subscription(
