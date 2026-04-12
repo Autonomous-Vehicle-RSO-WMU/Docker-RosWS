@@ -27,11 +27,8 @@
 # humble-ros-base only goes up to r36.3.0 on Docker Hub. This is fine: the host is r36.5.0
 # regardless, and --runtime nvidia injects the host GPU driver at runtime. The L4T version
 # in the container only determines which ZED SDK binary to download.
-FROM ros:humble-ros-base
+FROM dustynv/ros:humble-ros-base-l4t-r36.3.0
 
-ENV DEBIAN_FRONTEND=noninteractive
-ENV DEBCONF_NONINTERACTIVE_SEEN=true
-RUN echo 'keyboard-configuration keyboard-configuration/layoutcode select us' | debconf-set-selections
 # ZED SDK version — l4t36.3 matches the dustynv base above.
 ARG ZED_SDK_MAJOR=5
 ARG ZED_SDK_MINOR=2
@@ -140,15 +137,7 @@ RUN bash -c "\
     '-DCMAKE_LIBRARY_PATH=/usr/local/cuda/lib64/stubs' \
     '-DCMAKE_CXX_FLAGS=-Wl,--allow-shlib-undefined' \
 "
-# RUN . /opt/ros/humble/setup.bash && \
-#     MAKEFLAGS="-j1" colcon build \
-#     --event-handlers console_direct+ \
-#     --executor sequential \
-#     --parallel-workers 1 \
-#     --cmake-args \
-#       -DCMAKE_BUILD_TYPE=Release \
-#       -DCMAKE_LIBRARY_PATH=/usr/local/cuda/lib64/stubs \
-#       -DCMAKE_CXX_FLAGS=-Wl,--allow-shlib-undefined
+
 # Source the workspace setup
 RUN echo "source /workspace/install/setup.bash" >> /root/.bashrc
 
