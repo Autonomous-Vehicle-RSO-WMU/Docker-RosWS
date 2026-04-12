@@ -191,7 +191,7 @@ local_costmap:
       height: 5
       resolution: 0.05
       robot_radius: 0.22
-      plugins: ["voxel_layer", "inflation_layer"]
+      plugins: ["voxel_layer","flat_avoidance_layer" ,"inflation_layer"]
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
@@ -227,6 +227,25 @@ local_costmap:
           raytrace_min_range: 0.0
           obstacle_max_range: 2.5
           obstacle_min_range: 0.0
+      flat_avoidance_layer:
+        plugin: "nav2_costmap_2d::ObstacleLayer" # 2D is better for lanes
+        enabled: True
+        observation_sources: left_lane right_lane potholes
+        left_lane:
+          topic: /relative_lanecoords_L
+          data_type: "PointCloud2"
+          clearing: True
+          marking: True
+        right_lane:
+          topic: /relative_lanecoords_R
+          data_type: "PointCloud2"
+          clearing: True
+          marking: True
+        potholes:
+          topic: /potholes
+          data_type: "PointCloud2"
+          clearing: True
+          marking: True
       #static_layer:
       #  plugin: "nav2_costmap_2d::StaticLayer"
       #  map_subscribe_transient_local: True
@@ -246,7 +265,7 @@ global_costmap:
       robot_radius: 0.22
       resolution: 0.05
       track_unknown_space: True
-      plugins: ["obstacle_layer", "inflation_layer"]
+      plugins: ["obstacle_layer","lane_layer", "inflation_layer"]
       obstacle_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
         enabled: True
@@ -261,6 +280,25 @@ global_costmap:
           raytrace_min_range: 0.0
           obstacle_max_range: 2.5
           obstacle_min_range: 0.0
+      flat_avoidance_layer:
+        plugin: "nav2_costmap_2d::ObstacleLayer" # 2D is better for lanes
+        enabled: True
+        observation_sources: left_lane right_lane potholes
+        left_lane:
+          topic: /relative_lanecoords_L
+          data_type: "PointCloud2"
+          clearing: True
+          marking: True
+        right_lane:
+          topic: /relative_lanecoords_R
+          data_type: "PointCloud2"
+          clearing: True
+          marking: True
+        potholes:
+          topic: /potholes
+          data_type: "PointCloud2"
+          clearing: True
+          marking: True
       #static_layer:
       #  plugin: "nav2_costmap_2d::StaticLayer"
       #  enabled: True
