@@ -14,16 +14,55 @@
 # limitations under the License.
 
 import time
-from copy import deepcopy
 
 from geometry_msgs.msg import PoseStamped
-from rclpy.duration import Duration
 import rclpy
 
 from nav2_simple_commander.robot_navigator import BasicNavigator, TaskResult
 
-from geographic_msgs.msg import GeoPoint
 from robot_localization.srv import FromLL
+
+def initialize_waypoints(node):
+    # Declare parameter for target waypoints (flattened array of floats: (lat1, long1, lat2, long2))
+    node.declare_parameter('target_waypoints', [0.0, 0.0, 0.0, 0.0])
+    # Get target waypoints from mission_config.yaml
+    flat_waypoints = node.get_parameter('target_waypoints').get_parameter_value().double_array_value
+    # Repackage flat array into coordinate pairs
+    target_gps_waypoints = [(flat_waypoints[i], flat_waypoints[i+1]) for i in range(0, len(flat_waypoints), 2)]
+
+    return target_gps_waypoints
+
+def gps_to_pose(node, target_gps_waypoints):
+
+    # Create temporary node & client to handle translation services
+    from_ll_client = node.create_client(FromLL, '/fromLL')
+    while not from_ll_client.wait_for_service(timeout_sec=1.0):
+        node.get_logger().info('/fromLL service not available, waiting again...')
+
+    # Apply points to poseStamped msgs
+    waypoints = []
+                    
+    for pt in target_gps_waypoints:
+        points_pose = PoseStamped()
+        points_pose.header.frame_id = 'map'
+        points_pose.header.stamp = node.get_clock().now().to_msg()
+        points_pose.pose.orientation.w = 1.0  # Use "Identity" quaternion, does not matter (see goal_yaw_tolerance in nav2 config)
+
+        request = FromLL.Request()
+        request.ll_point.latitude = float(pt[0])
+        request.ll_point.longitude = float(pt[1])
+        request.ll_point.altitude = 0.0
+
+        future = from_ll_client.call_async(request)
+        rclpy.spin_until_future_complete(node, future)
+        map_point = future.result().map_point
+
+        points_pose.pose.position.x = map_point.x
+        points_pose.pose.position.y = map_point.y
+        waypoints.append(points_pose)
+
+    return waypoints
+
 
 
 def main():
@@ -31,52 +70,24 @@ def main():
 
     navigator = BasicNavigator()
 
-    # --- Get GPS Target Waypoints ---
-    # Create temporary helper node to use params
-    param_node = rclpy.create_node('waypoint_follower_params')
-    # Declare parameter for target waypoints (flattened array of floats: (lat1, long1, lat2, long2))
-    param_node.declare_parameter('target_waypoints', [0.0, 0.0, 0.0, 0.0])
-    # Get target waypoints from mission_config.yaml
-    flat_waypoints = param_node.get_parameter('target_waypoints').get_parameter_value().double_array_value
-    # Repackage flat array into coordinate pairs
-    target_gps_waypoints = [(flat_waypoints[i], flat_waypoints[i+1]) for i in range(0, len(flat_waypoints), 2)]
-    # OBLITERATE the node
-    param_node.destroy_node()
-
-    # --- Wait for navigation to fully activate ---
+    # ========================
+    # Get GPS Target Waypoints
+    # ========================
+    target_gps_waypoints = initialize_waypoints(navigator)
+    
+    # =====================================
+    # Wait for navigation to fully activate
+    # =====================================
     navigator.waitUntilNav2Active()
 
-    # --- Translate Raw GPS waypoints ---
-    # Create temporary node & client to handle translation services
-    translator_node = rclpy.create_node('waypoint_translator')
-    from_ll_client = translator_node.create_client(FromLL, '/fromLL')
-    while not from_ll_client.wait_for_service(timeout_sec=1.0):
-        translator_node.get_logger().info('/fromLL service not available, waiting again...')
+    # ===========================
+    # Translate Raw GPS waypoints
+    # ===========================
+    waypoints = gps_to_pose(navigator, target_gps_waypoints)
 
-    # Apply points to poseStamped msgs
-    waypoints = []
-
-    points_pose = PoseStamped()
-    points_pose.header.frame_id = 'map'
-    points_pose.header.stamp = navigator.get_clock().now().to_msg()
-    points_pose.pose.orientation.w = 1.0  # Use "Identity" quaternion, does not matter (see goal_yaw_tolerance in nav2 config)                    
-    for pt in target_gps_waypoints:
-        request = FromLL.Request()
-        request.ll_point.latitude = float(pt[0])
-        request.ll_point.longitude = float(pt[1])
-        request.ll_point.altitude = 0.0
-
-        future = from_ll_client.call_async(request)
-        rclpy.spin_until_future_complete(translator_node, future)
-        map_point = future.result().map_point
-
-        points_pose.pose.position.x = map_point.x
-        points_pose.pose.position.y = map_point.y
-        waypoints.append(deepcopy(points_pose))
-
-    nav_start = navigator.get_clock().now()
-
-    # Start task of navigation through waypoints
+    # ========================================
+    # Start task to navigate through waypoints
+    # ========================================
     nav_through_poses_task = navigator.goThroughPoses(waypoints)
 
     # TODO: Hardcode specific shared and/or indvidual route behavior for each course here? Or is this different concept or should be done elsewhere
