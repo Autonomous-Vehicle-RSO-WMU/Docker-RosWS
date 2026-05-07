@@ -69,7 +69,7 @@ def generate_launch_description():
     imu_broad_spawner = Node(
         package='controller_manager',
         executable='spawner',
-        arguments=['imu_broad', '--controller-manager', '/controller_manager'],
+        arguments=['imu_broad', '--controller-manager', '/controller_manager']
     )
 
     delay_diff_drive_spawner_after_joint_broad_spawner = RegisterEventHandler(
