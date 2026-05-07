@@ -9,7 +9,7 @@ controller_manager:
       type: joint_state_broadcaster/JointStateBroadcaster
 
     imu_broad:
-      type: imu_sensor_broadcaster/IMUSensorBroadcaster
+      type: imu_sensor_broadcaster/ImuSensorBroadcaster
 
 diff_cont:
   ros__parameters:
@@ -34,6 +34,5 @@ diff_cont:
 
 imu_broad:
   ros__parameters:
-    publish_rate: 50.0
     sensor_name: "imu_sensor"
     frame_id: "imu_link"
