@@ -70,8 +70,8 @@ class cam_coordsNode(Node):
     "image_h": 1080,
 
     # GPS & camera positions (meters)
-    "gps_location": np.array([[0], [0], [0]]),
-    "camera_location": np.array([[1], [0.5], [0]]),
+    "base_location": np.array([[0], [0], [0]]),
+    "camera_location": np.array([[0.25], [0], [1.01]]),
 
     # camera distortion constants
     "k1": 0,

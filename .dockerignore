@@ -45,6 +45,9 @@ saved_images/
 # Ignore build artifacts
 install/
 log/
+src/build/
+src/install/
+src/log/
 
 # Ignore OS files
 Thumbs.db

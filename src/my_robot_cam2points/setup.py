@@ -24,7 +24,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'camCoords = my_robot_cam2points.cam_coordsNode:main'
+            'camCoords = my_robot_cam2points.nodes.cam_coordsNode:main'
         ],
     },
 )

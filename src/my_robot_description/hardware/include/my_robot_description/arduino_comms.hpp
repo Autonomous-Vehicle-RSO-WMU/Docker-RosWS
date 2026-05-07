@@ -6,6 +6,7 @@
 // #include <cstdlib>
 #include <libserial/SerialPort.h>
 #include <iostream>
+#include <unistd.h>
 using namespace std;
 
 
@@ -38,10 +39,13 @@ public:
   ArduinoComms() = default;
 
   void connect(const string &serial_device, int32_t baud_rate, int32_t timeout_ms)
-  {  
+  {
     timeout_ms_ = timeout_ms;
     serial_conn_.Open(serial_device);
     serial_conn_.SetBaudRate(convert_baud_rate(baud_rate));
+    // Wait for Arduino to reset after serial open, then flush stale data
+    usleep(2000000);  // 2 seconds
+    serial_conn_.FlushIOBuffers();
   }
 
   void disconnect()

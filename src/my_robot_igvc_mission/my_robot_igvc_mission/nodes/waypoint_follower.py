@@ -44,7 +44,7 @@ def main():
     param_node.destroy_node()
 
     # --- Wait for navigation to fully activate ---
-    navigator.waitUntilNav2Active()
+    navigator.waitUntilNav2Active(localizer='bt_navigator')
 
     # --- Translate Raw GPS waypoints ---
     # Create temporary node & client to handle translation services

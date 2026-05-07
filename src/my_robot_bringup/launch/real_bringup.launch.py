@@ -17,15 +17,21 @@ def generate_launch_description():
     my_robot_description_share_dir = get_package_share_directory('my_robot_description')
     my_robot_localization_share_dir = get_package_share_directory('my_robot_localization')
     my_robot_navigation_share_dir = get_package_share_directory('my_robot_navigation')
+    my_robot_base_share_dir = get_package_share_directory('my_robot_base')
 
     # --- 2. Define Launch Arguments
 
     # --- 3. Include Core Launch Files ---
     diff_drive_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
-            my_robot_description_share_dir, 'launch', 'diff_drive.launch.py'
-        )]),
-        launch_arguments={'use_sim_time': 'false', 'use_ros2_control': 'true'}.items()
+            my_robot_description_share_dir, 'launch', 'diffdrive_physical.launch.py'
+        )])
+    )
+
+    base_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([os.path.join(
+            my_robot_base_share_dir, 'launch', 'base_launch.py'
+        )])
     )
 
     localization_launch = IncludeLaunchDescription(
@@ -48,6 +54,7 @@ def generate_launch_description():
     # --- 5. Return Final Launch Description ---
     return LaunchDescription([
         diff_drive_launch,
+        base_launch,
         localization_launch,
         navigation_launch
     ])

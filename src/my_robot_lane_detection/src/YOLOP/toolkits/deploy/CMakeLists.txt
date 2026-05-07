@@ -15,8 +15,8 @@ find_package(CUDA ${ZED_CUDA_VERSION} EXACT REQUIRED)
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
 # cuda
-include_directories(/usr/local/cuda-10.2/include)
-link_directories(/usr/local/cuda-10.2/lib64)
+include_directories(/usr/local/cuda/include)
+link_directories(/usr/local/cuda/lib64)
 # tensorrt
 include_directories(/usr/include/aarch64-linux-gnu/)
 link_directories(/usr/lib/aarch64-linux-gnu/)
@@ -28,7 +28,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Ofast -Wfatal-errors -
 
 set(ZED_LIBS ${ZED_LIBRARIES} ${CUDA_CUDA_LIBRARY} ${CUDA_CUDART_LIBRARY})
 
-coda_add_library(myplugins SHARED ${PROJECT_SOURCE_DIR}/yololayer.cu)
+cuda_add_library(myplugins SHARED ${PROJECT_SOURCE_DIR}/yololayer.cu)
 target_link_libraries(myplugins nvinfer cudart)
 
 find_package(OpenCV REQUIRED)

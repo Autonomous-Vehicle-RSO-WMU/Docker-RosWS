@@ -2,7 +2,7 @@ lidar_perception_node:
   ros__parameters:
     frames:
       lidar_frame: os_sensor
-      output_frame: base_link
+      output_frame: lidar_frame
 
     topics:
       pointcloud_in: /ouster/points

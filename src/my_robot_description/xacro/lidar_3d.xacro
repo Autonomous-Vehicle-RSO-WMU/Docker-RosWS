@@ -2,9 +2,9 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
     <joint name="lidar_joint" type="fixed">
-        <parent link="chassis"/>
+        <parent link="base_link"/>
         <child link="lidar_frame"/>
-        <origin xyz="0.305 0 0.71" rpy="0 0 0"/>
+        <origin xyz="0.29 0 0.3048" rpy="0 0 ${pi}"/>
     </joint>
 
     <link name="lidar_frame">
@@ -23,6 +23,13 @@
             <origin xyz="0 0 0" rpy="0 0 0"/>
         </xacro:inertial_cylinder>
     </link>
+
+    <joint name="lidar_frame_to_os_sensor" type="fixed">
+        <parent link="lidar_frame"/>
+        <child link="os_sensor"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+    <link name="os_sensor"/>
 
     <xacro:if value="$(arg sim_mode)">
         <gazebo reference="lidar_frame">

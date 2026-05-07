@@ -4,7 +4,7 @@
 camera_perception_node_rear:
   ros__parameters:
     frames:
-      camera_frame: zed_rear_left_camera_optical_frame
+      camera_frame: camera_link_optical_rear
 
     topics:
       camera_image: /zed_rear/zed_node/left/image_rect_color

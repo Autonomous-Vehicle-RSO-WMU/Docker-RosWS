@@ -31,7 +31,7 @@ public:
   {
     // Declare parameters (mirrored in YAML)
     this->declare_parameter<std::string>("frames.lidar_frame", "os_sensor");
-    this->declare_parameter<std::string>("frames.output_frame", "base_link");
+    this->declare_parameter<std::string>("frames.output_frame", "lidar_frame");
 
     this->declare_parameter<std::string>("topics.pointcloud_in", "/ouster/points");
     this->declare_parameter<std::string>("topics.detections3d_out", "/lidar/detections3d");

@@ -12,9 +12,14 @@ setup(
         ('share/' + package_name + '/config', [
             'config/camera_perception.yaml',
             'config/camera_perception_rear.yaml',
-            'config/zed_od_adapter.yaml',
         ]),
         ('share/' + package_name + '/launch', ['launch/camera_perception.launch.py']),
+        ('share/' + package_name + '/models', [
+            'models/best.engine',
+            'models/road_hazards_labels.yaml',
+            'models/yolov8_road_hazards.onnx',
+            'models/yolov8_road_hazards.pt',
+        ]),
     ],
     install_requires=['setuptools'],
     zip_safe=True,

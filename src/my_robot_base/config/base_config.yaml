@@ -1,4 +1,4 @@
 arduino_node_ros:
   ros__parameters:
-    port: '/dev/ttyACM0'
+    port: '/dev/serial/by-id/usb-Arduino__www.arduino.cc__0043_55936343833351518161-if00'
     baudrate: 115200

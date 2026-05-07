@@ -3,6 +3,14 @@
 # 2. "sudo docker run -it --rm --runtime nvidia --device=/dev/serial/by-id/usb-Arduino__www.arduino.cc__0042_03536373332351C06150-if00 --device=/dev/serial/by-id/usb-Arduino__www.arduino.cc__0043_55936343833351518161-if00 ros2_workspace"
 # 3. "source install/setup.bash"
 
+# If you want to use RViz:
+# 1. xhost +local:docker
+# 2. sudo docker run -it --rm --runtime nvidia --device=/dev/serial/by-id/usb-Arduino__www.arduino.cc__0042_03536373332351C06150-if00 --device=/dev/serial/by-id/usb-Arduino__www.arduino.cc__0043_55936343833351518161-if00 -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix ros2_workspace
+
+# REQUIRED for ZED cameras (USB access + GPU/NITROS):
+# sudo docker run -it --rm   --runtime=nvidia   --network host   --privileged   -v /dev:/dev   -v /tmp/argus_socket:/tmp/argus_socket   -v /etc/udev:/etc/udev   ros2_workspace
+# sudo docker run -it --rm --runtime=nvidia --network host --privileged -v /dev:/dev -v /tmp/argus_socket:/tmp/argus_socket ros2_workspace
+
 # Steps to open image in adjacent terminal:
 # 1. "sudo docker ps" and copy name under NAMES
 # 2. sudo docker exec -it <name> bash
@@ -39,7 +47,8 @@ ARG L4T_MINOR=3
 ENV LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \
     ROS_DISTRO=humble \
-    DEBIAN_FRONTEND=noninteractive
+    DEBIAN_FRONTEND=noninteractive \
+    LD_LIBRARY_PATH=/usr/local/cuda/lib64:/usr/lib/aarch64-linux-gnu:${LD_LIBRARY_PATH}
 
 # Refresh the ROS GPG key — the key baked into the dustynv base image expires over time.
 # Stereolabs does the same in their own Dockerfile.l4t-humble (line 48).
@@ -70,6 +79,21 @@ RUN apt-get update && apt-get install -y \
     ros-humble-tf2 \
     && rm -rf /var/lib/apt/lists/*
 
+RUN pip3 install --no-cache-dir \
+    torch==2.8.0 torchvision==0.23.0 \
+    --index-url https://pypi.jetson-ai-lab.io/jp6/cu126
+
+# ultralytics (YOLOv8) — torch already satisfied above so pip won't overwrite it
+RUN pip3 install --no-cache-dir ultralytics \
+    --index-url https://pypi.org/simple \
+    --extra-index-url https://pypi.jetson-ai-lab.io/jp6/cu126
+
+# ultralytics pulls in numpy>=2 which breaks cv2 (compiled against numpy 1.x).
+# Pin back to the last 1.x series — both ultralytics and cv2 are compatible with it.
+# --index-url forces PyPI; avoids the unreachable jetson.webredirect.org mirror.
+RUN pip3 install --no-cache-dir "numpy<2" --index-url https://pypi.org/simple
+
+    
 # Initialize rosdep (skip if already done in base image)
 RUN if [ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then rosdep init; fi && rosdep update
 
@@ -88,6 +112,7 @@ RUN wget -q --no-check-certificate \
     rm -rf /usr/local/zed/resources/* && \
     rm ZED_SDK_Linux_JP.run && \
     rm -rf /var/lib/apt/lists/*
+
 
 # Create workspace directory
 WORKDIR /workspace
@@ -108,7 +133,7 @@ RUN echo 'Dpkg::Options { "--force-overwrite"; };' > /etc/apt/apt.conf.d/99force
     rm -rf /var/lib/apt/lists/*
 
 # TODO TEST 0.1
-RUN ls /opt/ros/humble
+#RUN ls /opt/ros/humble
 
 # Build the workspace.
 # The cmake flags are required by zed-ros2-wrapper (from Stereolabs' own Dockerfile.l4t-humble).

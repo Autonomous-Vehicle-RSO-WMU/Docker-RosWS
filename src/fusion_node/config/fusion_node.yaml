@@ -1,7 +1,7 @@
 fusion_node:
   ros__parameters:
     frames:
-      lidar_frame: os_lidar
+      lidar_frame: os_sensor
       base_frame: base_link
 
     topics:
@@ -10,12 +10,12 @@ fusion_node:
     # Multi-camera configuration: each camera has its own frame, topics, etc.
     cameras:
       front:
-        frame: zed_left_camera_optical_frame
+        frame: camera_link_optical
         detections2d: /camera/detections2d
         camera_info: /zed/zed_node/left/camera_info
         camera_image: /zed/zed_node/left/image_rect_color
       rear:
-        frame: zed_rear_left_camera_optical_frame
+        frame: camera_link_optical_rear
         detections2d: /camera_rear/detections2d
         camera_info: /zed_rear/zed_node/left/camera_info
         camera_image: /zed_rear/zed_node/left/image_rect_color

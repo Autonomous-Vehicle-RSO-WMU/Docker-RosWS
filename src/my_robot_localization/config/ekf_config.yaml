@@ -2,7 +2,7 @@
 ekf_filter_node_odom:
     ros__parameters:
 
-        use_sim_time: true
+        # use_sim_time: true
 
         
 # The frequency, in Hz, at which the filter will output a position estimate. Note that the filter will not begin
@@ -89,7 +89,7 @@ ekf_filter_node_odom:
 # do not provide some of the state variables estimated by the filter. For example, a TwistWithCovarianceStamped message
 # has no pose information, so the first six values would be meaningless in that case. Each vector defaults to all false
 # if unspecified, effectively making this parameter required for each sensor.
-        odom0_config: [true, true, true,
+        odom0_config: [false, false, false,
                        false, false, false,
                        true,  true,  true,
                        false, false, true,
@@ -137,10 +137,10 @@ ekf_filter_node_odom:
 
         imu0: imu_broad/imu
         imu0_config: [false, false, false,
-                      true,  true,  true,
+                      false,  false,  true,
                       false, false, false,
-                      true,  true,  true,
-                      true,  true,  true]
+                      false,  false,  false,
+                      false,  false,  false]
 
         #        [x_pos   , y_pos    , z_pos,
         #         roll    , pitch    , yaw,
@@ -237,7 +237,7 @@ ekf_filter_node_odom:
 ekf_filter_node_map:
   ros__parameters:
 
-    use_sim_time: true
+#     use_sim_time: true
 
 
     frequency: 30.0
@@ -260,7 +260,7 @@ ekf_filter_node_map:
     world_frame: map
 
     odom0: diff_cont/odom
-    odom0_config: [true,  true, true,
+    odom0_config: [false,  false, false,
                    false, false, false,
                    true,  true,  true,
                    false, false, true,
@@ -283,10 +283,10 @@ ekf_filter_node_map:
 
     imu0: imu_broad/imu
     imu0_config: [false, false, false,
-                  true,  true,  true,
+                  false,  false,  true,
                   false, false, false,
-                  true,  true,  true,
-                  true,  true,  true]
+                  false,  false,  false,
+                  false,  false,  false]
     imu0_nodelay: false
     imu0_differential: false
     imu0_relative: false
@@ -332,7 +332,7 @@ ekf_filter_node_map:
 
 navsat_transform:
   ros__parameters:
-    use_sim_time: true
+    #use_sim_time: true
     frequency: 30.0
     delay: 3.0
     magnetic_declination_radians: -0.1466  # 
@@ -342,10 +342,10 @@ navsat_transform:
     # broadcast_utm_transform: true
     broadcast_utm_transform_as_parent_frame: true
     publish_filtered_gps: true
-    use_odometry_yaw: true
+    use_odometry_yaw: false
     # --- For generic testing ---
-    #wait_for_datum: false
+    wait_for_datum: false
     # --- For IGVC like waypoint testing ---
-    wait_for_datum: true  # Use datum as X: 0.0 and Y: 0.0 for map
-    datum: [42.668056, -83.216944, 0.0] # Input starting GPS waypoint coords here
+    #wait_for_datum: true  # Use datum as X: 0.0 and Y: 0.0 for map
+    #datum: [42.668056, -83.216944, 0.0] # Input starting GPS waypoint coords here
         

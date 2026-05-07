@@ -15,8 +15,9 @@ details = {
     "image_h": 1080,
 
     # GPS & camera positions (meters)
+    #front, side to side, height
     "gps_location": np.array([[0], [0], [0]]),
-    "camera_location": np.array([[1], [0.5], [0]]),
+    "camera_location": np.array([[0], [0], [1]]),
 
     # camera distortion constants
     "k1": 0,
@@ -28,7 +29,7 @@ details = {
 
 
 
-def create_matrixes(details,vehicle_tilt,vehicle_slant,vehicle_heading,relativeto='base'):
+def create_matrixes(details,vehicle_tilt,vehicle_slant,vehicle_heading):
     #im assuming that the inputs will be in degrees, if the input is in radianss, this segment will be removed
     # vehicle_heading = np.radians(vehicle_heading)
     # vehicle_slant   = np.radians(vehicle_slant)
@@ -67,47 +68,18 @@ def create_matrixes(details,vehicle_tilt,vehicle_slant,vehicle_heading,relativet
     ])
 
     # Offset matrix
-    camera_offset= details.camera_location- details.gps_location if relativeto=='gps' else [[0],[0],[0 ]]
-    camera_offset_matrix =  _camera_offset_matrix(vehicle_slant, vehicle_heading, vehicle_tilt)
-    camera_offset_matrix = camera_offset #camera_offset_matrix @ 
+    camera_offset= details.camera_location- details.base_location
+
+
+    
     R_inv, R_z_inv, R_x_inv = np.linalg.inv(R), np.linalg.inv(R_z), np.linalg.inv(R_x)
-    return R, R_inv, R_x_inv, R_z_inv, camera_offset_matrix
+    return R, R_inv, R_x_inv, R_z_inv, camera_offset
 
     
 
-def _camera_offset_matrix(vehicle_slant, vehicle_heading, vehicle_tilt):
-    # Returns 3x3 GPS offset matrix
-    return np.array([
-        [
-            np.cos(vehicle_slant)*np.cos(vehicle_heading),
-            np.cos(vehicle_slant)*np.sin(vehicle_heading)*np.sin(vehicle_tilt) - np.sin(vehicle_slant)*np.cos(vehicle_tilt),
-            np.cos(vehicle_slant)*np.sin(vehicle_heading)*np.cos(vehicle_tilt) + np.sin(vehicle_slant)*np.sin(vehicle_tilt)
-        ],
-        [
-            np.sin(vehicle_slant)*np.cos(vehicle_heading),
-            np.sin(vehicle_slant)*np.sin(vehicle_heading)*np.sin(vehicle_tilt) + np.cos(vehicle_slant)*np.cos(vehicle_tilt),
-            np.sin(vehicle_slant)*np.sin(vehicle_heading)*np.cos(vehicle_tilt) - np.cos(vehicle_slant)*np.sin(vehicle_tilt)
-        ],
-        [
-            -np.sin(vehicle_heading),
-            np.cos(vehicle_heading)*np.sin(vehicle_tilt),
-            np.cos(vehicle_heading)*np.cos(vehicle_tilt)
-        ]
-    ])
 
-
-# def cam_to_gps(details,u,v,D,vehicle_heading=0,vehicle_slant=0,vehicle_tilt=0,camera_rotation_on_mount=0 ,camera_vertical_rotation=0,camera_tilt=0):
-
-#     N,E,D,=cam_to_coords(details,u,v,D,vehicle_heading,vehicle_slant,vehicle_tilt,camera_rotation_on_mount,camera_vertical_rotation,camera_tilt,'gps')
-    
-#     #GPS conversion
-    
-#     # convert ENU -> geodetic
-#     lat, lon, alt = pm.enu2geodetic(N,E,D, lat0, lon0, alt0)
-#     print(lat0,lon0,alt0)
-#     print(lat, lon, alt)
-#     return (lat,lon,alt)
-def cam_to_coords(details,u,v,D,vehicle_heading=0,vehicle_slant=0,vehicle_tilt=0,camera_rotation_on_mount=0,camera_vertical_rotation=0,camera_tilt=0,relativeto='base'):
+def cam_to_coords(details,u,v,vehicle_heading=0,vehicle_slant=0,vehicle_tilt=0,camera_rotation_on_mount=0,camera_vertical_rotation=0,camera_tilt=0,relativeto='base'):
+    D=details.camera_location[2][0]
     x_prime,y_prime=camera_to_normalized(u,v,details)
     R,R_inv,R_x_inv,R_z_inv,camera_offsetmatrix=create_matrixes(details,vehicle_heading,vehicle_slant,vehicle_tilt,camera_rotation_on_mount,camera_vertical_rotation,camera_tilt,relativeto)
     NE=convert_to_North_East_Down(x_prime,y_prime,D,R,R_inv,R_x_inv,R_z_inv)

@@ -21,7 +21,7 @@ from yolop_lane_ros2.msg import LaneData
 # -----------------------------
 # YOLOP import path
 # -----------------------------
-YOLOP_DIR = os.path.expanduser("~/ros2_ws/src/YOLOP")
+YOLOP_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'YOLOP'))
 sys.path.insert(0, YOLOP_DIR)
 
 from lib.config import cfg
@@ -151,7 +151,10 @@ class YolopLaneNode(Node):
         # Parameters
         # -----------------------------
         self.declare_parameter("image_topic", "/camera/image_raw")
-        self.declare_parameter("weights", os.path.expanduser("~/ros2_ws/src/YOLOP/weights/End-to-end.pth"))
+        self.declare_parameter(
+            "weights",
+            os.path.expanduser("~/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/weights/End-to-end.pth")
+        )
         self.declare_parameter("device", "cpu")
         self.declare_parameter("img_size", 640)
 
@@ -172,12 +175,18 @@ class YolopLaneNode(Node):
         self.declare_parameter("metrics_log_every", 30)
         self.declare_parameter("jitter_window", 30)
 
-        self.declare_parameter("csv_path", os.path.expanduser("~/yolop_lane_data.csv"))
+        self.declare_parameter(
+            "csv_path",
+            os.path.expanduser("~/Docker-RosWS/src/my_robot_lane_detection/yolop_lane_data.csv")
+        )
         self.declare_parameter("row_step", 5)
         self.declare_parameter("flush_every", 30)
 
         self.declare_parameter("save_video", True)
-        self.declare_parameter("video_path", os.path.expanduser("~/yolop_overlay.mp4"))
+        self.declare_parameter(
+            "video_path",
+            os.path.expanduser("~/Docker-RosWS/src/my_robot_lane_detection/yolop_overlay.mp4")
+        )
         self.declare_parameter("video_fps", 30.0)
         self.declare_parameter("video_codec", "mp4v")
         self.declare_parameter("video_stream", "overlay")
