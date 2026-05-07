@@ -63,14 +63,14 @@
   <library_effects>
     <effect id="Material-effect">
       <profile_COMMON>
-        <newparam sid="Screenshot_2025-10-22_194437_png-surface">
+        <newparam sid="texture_png-surface">
           <surface type="2D">
-            <init_from>Screenshot_2025-10-22_194437_png</init_from>
+            <init_from>texture_png</init_from>
           </surface>
         </newparam>
-        <newparam sid="Screenshot_2025-10-22_194437_png-sampler">
+        <newparam sid="texture_png-sampler">
           <sampler2D>
-            <source>Screenshot_2025-10-22_194437_png-surface</source>
+            <source>texture_png-surface</source>
           </sampler2D>
         </newparam>
         <technique sid="common">
@@ -79,7 +79,7 @@
               <color sid="emission">0 0 0 1</color>
             </emission>
             <diffuse>
-              <texture texture="Screenshot_2025-10-22_194437_png-sampler" texcoord="UVMap"/>
+              <texture texture="texture_png-sampler" texcoord="UVMap"/>
             </diffuse>
             <index_of_refraction>
               <float sid="ior">1.5</float>
@@ -90,8 +90,8 @@
     </effect>
   </library_effects>
   <library_images>
-    <image id="Screenshot_2025-10-22_194437_png" name="Screenshot_2025-10-22_194437_png">
-      <init_from>Screenshot%202025-10-22%20194437.png</init_from>
+    <image id="texture_png" name="texture_png">
+      <init_from>texture.png</init_from>
     </image>
   </library_images>
   <library_materials>

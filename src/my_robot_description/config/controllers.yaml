@@ -9,7 +9,7 @@ controller_manager:
       type: joint_state_broadcaster/JointStateBroadcaster
 
     imu_broad:
-      type: imu_sensor_broadcaster/ImuSensorBroadcaster
+      type: imu_sensor_broadcaster/IMUSensorBroadcaster
 
 diff_cont:
   ros__parameters:

@@ -1,0 +1,210 @@
+``` bash
+wmu_av@ubuntu:~/Desktop/Docker-RosWS$ colcon build
+Starting >>> zed_msgs
+Starting >>> fusion_msgs
+Starting >>> my_robot_description
+Starting >>> lidar_perception
+Starting >>> my-test-package
+Starting >>> my_robot_base
+Finished <<< my_robot_description [2.37s]                                                        
+Starting >>> my_robot_cam2points
+Finished <<< lidar_perception [2.46s]                                                            
+Starting >>> my_robot_gazebo
+Finished <<< zed_msgs [4.15s]                                                                      
+Starting >>> zed_components
+Finished <<< my_robot_gazebo [1.69s]                                                        
+Starting >>> my_robot_igvc_mission
+Finished <<< fusion_msgs [4.35s]                                                            
+Starting >>> my_robot_localization                                                    
+Finished <<< my-test-package [5.87s]                                                   
+Starting >>> my_robot_navigation                                                           
+Finished <<< zed_components [2.64s]                                                        
+Finished <<< my_robot_base [6.72s]                                                         
+Starting >>> zed_wrapper
+Starting >>> my_robot_teleop
+Finished <<< my_robot_cam2points [5.43s]                                                           
+Starting >>> yolop
+Finished <<< my_robot_navigation [1.37s]                              
+Starting >>> yolop_lane_ros2
+Finished <<< zed_wrapper [1.42s]                                       
+Starting >>> camera_perception
+Finished <<< my_robot_igvc_mission [5.45s]                             
+Starting >>> fusion_node
+Finished <<< my_robot_teleop [4.25s]                                                            
+Starting >>> my_robot_bringup
+Finished <<< my_robot_localization [7.03s]                                                      
+Starting >>> zed_debug
+Finished <<< my_robot_bringup [0.46s]                            
+Starting >>> zed_ros2
+Finished <<< fusion_node [2.21s]                                 
+Finished <<< zed_ros2 [0.54s]                                                                     
+Finished <<< zed_debug [1.01s]                                                                    
+Finished <<< yolop_lane_ros2 [4.53s]                                                              
+--- stderr: yolop                                                                       
+CMake Deprecation Warning at CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 2.8.12 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value or use a ...<max> suffix to tell
+  CMake that the project does not need compatibility with older versions.
+
+
+/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/toolkits/deploy/yololayer.h(60): error: member function declared with "override" does not override a base class member
+          virtual int enqueue(int batchSize, const void*const * inputs, void** outputs, void* workspace, cudaStream_t stream) override;
+                      ^
+
+/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/toolkits/deploy/yololayer.h(60): warning #997-D: function "nvinfer1::IPluginV2::enqueue(int32_t, const void *const *, void *const *, void *, cudaStream_t)" is hidden by "nvinfer1::YoloLayerPlugin::enqueue" -- virtual function override intended?
+          virtual int enqueue(int batchSize, const void*const * inputs, void** outputs, void* workspace, cudaStream_t stream) override;
+                      ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/toolkits/deploy/yololayer.h(91): warning #997-D: function "nvinfer1::IPluginV2Ext::configurePlugin(const nvinfer1::Dims *, int32_t, const nvinfer1::Dims *, int32_t, const nvinfer1::DataType *, const nvinfer1::DataType *, const bool *, const bool *, nvinfer1::PluginFormat, int32_t)" is hidden by "nvinfer1::YoloLayerPlugin::configurePlugin" -- virtual function override intended?
+          void configurePlugin(const PluginTensorDesc* in, int nbInput, const PluginTensorDesc* out, int nbOutput) override;
+               ^
+
+/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/toolkits/deploy/yololayer.h(93): error: exception specification for virtual function "nvinfer1::YoloLayerPlugin::detachFromContext" is incompatible with that of overridden function "nvinfer1::IPluginV2Ext::detachFromContext"
+          void detachFromContext() override;
+               ^
+
+/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/toolkits/deploy/yololayer.h(91): error: exception specification for virtual function "nvinfer1::YoloLayerPlugin::configurePlugin" is incompatible with that of overridden function "nvinfer1::IPluginV2IOExt::configurePlugin(const nvinfer1::PluginTensorDesc *, int32_t, const nvinfer1::PluginTensorDesc *, int32_t)"
+          void configurePlugin(const PluginTensorDesc* in, int nbInput, const PluginTensorDesc* out, int nbOutput) override;
+               ^
+
+/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/toolkits/deploy/yololayer.h(88): error: exception specification for virtual function "nvinfer1::YoloLayerPlugin::attachToContext" is incompatible with that of overridden function "nvinfer1::IPluginV2Ext::attachToContext"
+          void attachToContext(
+               ^
+
+/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/toolkits/deploy/yololayer.h(86): error: exception specification for virtual function "nvinfer1::YoloLayerPlugin::canBroadcastInputAcrossBatch" is incompatible with that of overridden function "nvinfer1::IPluginV2Ext::canBroadcastInputAcrossBatch"
+          bool canBroadcastInputAcrossBatch(int inputIndex) const override;
+               ^
+
+/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/toolkits/deploy/yololayer.h(84): error: exception specification for virtual function "nvinfer1::YoloLayerPlugin::isOutputBroadcastAcrossBatch" is incompatible with that of overridden function "nvinfer1::IPluginV2Ext::isOutputBroadcastAcrossBatch"
+          bool isOutputBroadcastAcrossBatch(int outputIndex, const bool* inputIsBroadcasted, int nbInputs) const override;
+               ^
+
+/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/toolkits/deploy/yololayer.h(82): error: exception specification for virtual function "nvinfer1::YoloLayerPlugin::getOutputDataType" is incompatible with that of overridden function "nvinfer1::IPluginV2Ext::getOutputDataType"
+          DataType getOutputDataType(int index, const nvinfer1::DataType* inputTypes, int nbInputs) const override;
+                   ^
+
+/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/toolkits/deploy/yololayer.h(80): error: exception specification for virtual function "nvinfer1::YoloLayerPlugin::getPluginNamespace" is incompatible with that of overridden function "nvinfer1::IPluginV2::getPluginNamespace"
+          const char* getPluginNamespace() const override;
+                      ^
+
+/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/toolkits/deploy/yololayer.h(78): error: exception specification for virtual function "nvinfer1::YoloLayerPlugin::setPluginNamespace" is incompatible with that of overridden function "nvinfer1::IPluginV2::setPluginNamespace"
+          void setPluginNamespace(const char* pluginNamespace) override;
+               ^
+
+/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/toolkits/deploy/yololayer.h(76): error: exception specification for virtual function "nvinfer1::YoloLayerPlugin::clone" is incompatible with that of overridden function "nvinfer1::IPluginV2Ext::clone"
+          IPluginV2IOExt* clone() const override;
+                          ^
+
+/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/toolkits/deploy/yololayer.h(76): error: exception specification for virtual function "nvinfer1::YoloLayerPlugin::clone" is incompatible with that of overridden function "nvinfer1::IPluginV2::clone"
+          IPluginV2IOExt* clone() const override;
+                          ^
+
+/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/toolkits/deploy/yololayer.h(74): error: exception specification for virtual function "nvinfer1::YoloLayerPlugin::destroy" is incompatible with that of overridden function "nvinfer1::IPluginV2::destroy"
+          void destroy() override;
+               ^
+
+/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/toolkits/deploy/yololayer.h(72): error: exception specification for virtual function "nvinfer1::YoloLayerPlugin::getPluginVersion" is incompatible with that of overridden function "nvinfer1::IPluginV2::getPluginVersion"
+          const char* getPluginVersion() const override;
+                      ^
+
+/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/toolkits/deploy/yololayer.h(70): error: exception specification for virtual function "nvinfer1::YoloLayerPlugin::getPluginType" is incompatible with that of overridden function "nvinfer1::IPluginV2::getPluginType"
+          const char* getPluginType() const override;
+                      ^
+
+/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/toolkits/deploy/yololayer.h(66): error: exception specification for virtual function "nvinfer1::YoloLayerPlugin::supportsFormatCombination" is incompatible with that of overridden function "nvinfer1::IPluginV2IOExt::supportsFormatCombination"
+          bool supportsFormatCombination(int pos, const PluginTensorDesc* inOut, int nbInputs, int nbOutputs) const override {
+               ^
+
+/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/toolkits/deploy/yololayer.h(64): error: exception specification for virtual function "nvinfer1::YoloLayerPlugin::serialize" is incompatible with that of overridden function "nvinfer1::IPluginV2::serialize"
+          virtual void serialize(void* buffer) const override;
+                       ^
+
+/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/toolkits/deploy/yololayer.h(62): error: exception specification for virtual function "nvinfer1::YoloLayerPlugin::getSerializationSize" is incompatible with that of overridden function "nvinfer1::IPluginV2::getSerializationSize"
+          virtual size_t getSerializationSize() const override;
+                         ^
+
+/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/toolkits/deploy/yololayer.h(58): error: exception specification for virtual function "nvinfer1::YoloLayerPlugin::getWorkspaceSize" is incompatible with that of overridden function "nvinfer1::IPluginV2::getWorkspaceSize"
+          virtual size_t getWorkspaceSize(int maxBatchSize) const override { return 0; }
+                         ^
+
+/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/toolkits/deploy/yololayer.h(56): error: exception specification for virtual function "nvinfer1::YoloLayerPlugin::terminate" is incompatible with that of overridden function "nvinfer1::IPluginV2::terminate"
+          virtual void terminate() override {};
+                       ^
+
+/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/toolkits/deploy/yololayer.h(54): error: exception specification for virtual function "nvinfer1::YoloLayerPlugin::initialize" is incompatible with that of overridden function "nvinfer1::IPluginV2::initialize"
+          int initialize() override;
+              ^
+
+/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/toolkits/deploy/yololayer.h(52): error: exception specification for virtual function "nvinfer1::YoloLayerPlugin::getOutputDimensions" is incompatible with that of overridden function "nvinfer1::IPluginV2::getOutputDimensions"
+          Dims getOutputDimensions(int index, const Dims* inputs, int nbInputDims) override;
+               ^
+
+/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/toolkits/deploy/yololayer.h(47): error: exception specification for virtual function "nvinfer1::YoloLayerPlugin::getNbOutputs" is incompatible with that of overridden function "nvinfer1::IPluginV2::getNbOutputs"
+          int getNbOutputs() const override
+              ^
+
+/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/toolkits/deploy/yololayer.h(130): error: exception specification for virtual function "nvinfer1::YoloPluginCreator::getPluginNamespace" is incompatible with that of overridden function "nvinfer1::v_1_0::IPluginCreator::getPluginNamespace"
+          const char* getPluginNamespace() const override
+                      ^
+
+/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/toolkits/deploy/yololayer.h(125): error: exception specification for virtual function "nvinfer1::YoloPluginCreator::setPluginNamespace" is incompatible with that of overridden function "nvinfer1::v_1_0::IPluginCreator::setPluginNamespace"
+          void setPluginNamespace(const char* libNamespace) override
+               ^
+
+/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/toolkits/deploy/yololayer.h(123): error: exception specification for virtual function "nvinfer1::YoloPluginCreator::deserializePlugin" is incompatible with that of overridden function "nvinfer1::v_1_0::IPluginCreator::deserializePlugin"
+          IPluginV2IOExt* deserializePlugin(const char* name, const void* serialData, size_t serialLength) override;
+                          ^
+
+/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/toolkits/deploy/yololayer.h(121): error: exception specification for virtual function "nvinfer1::YoloPluginCreator::createPlugin" is incompatible with that of overridden function "nvinfer1::v_1_0::IPluginCreator::createPlugin"
+          IPluginV2IOExt* createPlugin(const char* name, const PluginFieldCollection* fc) override;
+                          ^
+
+/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/toolkits/deploy/yololayer.h(119): error: exception specification for virtual function "nvinfer1::YoloPluginCreator::getFieldNames" is incompatible with that of overridden function "nvinfer1::v_1_0::IPluginCreator::getFieldNames"
+          const PluginFieldCollection* getFieldNames() override;
+                                       ^
+
+/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/toolkits/deploy/yololayer.h(117): error: exception specification for virtual function "nvinfer1::YoloPluginCreator::getPluginVersion" is incompatible with that of overridden function "nvinfer1::v_1_0::IPluginCreator::getPluginVersion"
+          const char* getPluginVersion() const override;
+                      ^
+
+/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/toolkits/deploy/yololayer.h(115): error: exception specification for virtual function "nvinfer1::YoloPluginCreator::getPluginName" is incompatible with that of overridden function "nvinfer1::v_1_0::IPluginCreator::getPluginName"
+          const char* getPluginName() const override;
+                      ^
+
+/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/toolkits/deploy/yololayer.cu(175): error: object of abstract class type "nvinfer1::YoloLayerPlugin" is not allowed:
+            pure virtual function "nvinfer1::IPluginV2::enqueue" has no overrider
+          YoloLayerPlugin* p = new YoloLayerPlugin(mClassCount, mYoloV5NetWidth, mYoloV5NetHeight, mMaxOutObject, mYoloKernel);
+                                   ^
+
+/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/toolkits/deploy/yololayer.cu(319): error: object of abstract class type "nvinfer1::YoloLayerPlugin" is not allowed:
+            pure virtual function "nvinfer1::IPluginV2::enqueue" has no overrider
+          YoloLayerPlugin* obj = new YoloLayerPlugin(class_count, input_w, input_h, max_output_object_count, yolo_kernels);
+                                     ^
+
+/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/toolkits/deploy/yololayer.cu(328): error: object of abstract class type "nvinfer1::YoloLayerPlugin" is not allowed:
+            pure virtual function "nvinfer1::IPluginV2::enqueue" has no overrider
+          YoloLayerPlugin* obj = new YoloLayerPlugin(serialData, serialLength);
+                                     ^
+
+32 errors detected in the compilation of "/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/toolkits/deploy/yololayer.cu".
+CMake Error at myplugins_generated_yololayer.cu.o.Release.cmake:280 (message):
+  Error generating file
+  /home/wmu_av/Desktop/Docker-RosWS/build/yolop/CMakeFiles/myplugins.dir//./myplugins_generated_yololayer.cu.o
+
+
+gmake[2]: *** [CMakeFiles/myplugins.dir/build.make:355: CMakeFiles/myplugins.dir/myplugins_generated_yololayer.cu.o] Error 1
+gmake[1]: *** [CMakeFiles/Makefile2:84: CMakeFiles/myplugins.dir/all] Error 2
+gmake: *** [Makefile:91: all] Error 2
+---
+Failed   <<< yolop [4.78s, exited with code 2]
+Aborted  <<< camera_perception [4.80s]                        
+
+Summary: 19 packages finished [18.5s]
+  1 package failed: yolop
+  1 package aborted: camera_perception
+  1 package had stderr output: yolop
+```

@@ -39,12 +39,7 @@ class cam_coordsNode(Node):
              'waypoint',
              10
          )
-        self.gpscubscription= self.create_subscription(
-            NavSatFix,
-            '/gps/fix',
-            self.gpscallback,
-            10
-        )
+
         self.lanedetectionsubscription = self.create_subscription(
             LaneData,          # message type we're receiving
             'overlay_data',          # no topic name because no working node yet
@@ -58,9 +53,7 @@ class cam_coordsNode(Node):
             "/camera/detections2d",
             self.objcallback
         )
-   
-        self.orientation=np.array[0,0,0]
-        
+
         self.camDetails={
     # details about the camera
     "camera_focal": 2.8,
@@ -70,7 +63,6 @@ class cam_coordsNode(Node):
     "image_h": 1080,
 
     # GPS & camera positions (meters)
-    "base_location": np.array([[0], [0], [0]]),
     "camera_location": np.array([[0.25], [0], [1.01]]),
 
     # camera distortion constants
@@ -112,8 +104,7 @@ class cam_coordsNode(Node):
 
 
 
-    def Imu_callback(self,msg):
-        self.orientation=[msg.x,msg.y.msg.z]      
+     
     def camLane_callback(self,msg):
         L=([[],[],[]])
         R=([[],[],[]])

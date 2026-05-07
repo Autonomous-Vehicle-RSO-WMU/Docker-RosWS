@@ -89,13 +89,12 @@ public:
     string response = send_msg("\r");
   }
 
-  void read_sensor_values(int &enc_l, int &enc_r, double*accel, double*gyro, double*mag)
+  void read_sensor_values(double &enc_l, double &enc_r, double*accel, double*gyro, double*mag)
   {
     string response = send_msg("e\r");
 
     string delimiter = ",";
     char *buf=response.data();
-    size_t del_pos = response.find(delimiter);
     //delimiter.cstr is because stringsep is a C function and expects a char* not a string and so its just there so we can easily change the delimiter if we want to in the future. Also, we have to use a char* for stringsep because it modifies the string by inserting null terminators at the end of each token and advancing the pointer, so we can't use a const char* or a std::string directly.
     auto next_token = [&]() -> string {
       char *t = strsep(&buf, delimiter.c_str());

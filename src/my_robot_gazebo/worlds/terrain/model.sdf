@@ -22,7 +22,7 @@
         	        <material>
         	            <script>
         	                <uri>model://terrain/media/scripts/terrain.material</uri>
-        	                <uri>model://terrain/media/textures/texture.png</uri>
+        	                <uri>model://terrain/media/texture.png</uri>
 				<name>TerrainMat</name>
         	            </script>
         	        </material>

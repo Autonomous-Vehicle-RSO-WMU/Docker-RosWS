@@ -14,31 +14,34 @@ def generate_launch_description():
 
     # --- 1. Find Paths ---
     my_robot_gazebo_share_dir = get_package_share_directory('my_robot_gazebo')
+    my_robot_description_share_dir = get_package_share_directory('my_robot_description')
 
     world_file_path = os.path.join(my_robot_gazebo_share_dir, 'worlds', 'terrain', 'model.sdf')
 
-    gazebo_params_file = os.path.join(
-        my_robot_gazebo_share_dir, 'config', 'gazebo_params.yaml'
-        )
-        
     # --- 2. Define Launch Arguments ---
     # use_ros2_control = LaunchConfiguration('use_ros2_control')
 
     # --- 3. Launch Gazebo ---
+    rsp_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([os.path.join(
+            my_robot_description_share_dir, 'launch', 'rsp.launch.py'
+        )]),
+        launch_arguments={'use_sim_time': 'true', 'use_ros2_control': 'true'}.items()
+    )
+
     gazebo_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
-            get_package_share_directory('gazebo_ros'), 'launch', 'gazebo.launch.py'
+            get_package_share_directory('ros_gz_sim'), 'launch', 'gz_sim.launch.py'
             )]),
         launch_arguments={
-        	'extra_gazebo_args': '--ros-args --params-file ' + gazebo_params_file,
-        	'world': world_file_path	
+            'gz_args': world_file_path + ' -r',
         }.items()
     )
 
     # --- 4. Define Nodes ---
     spawn_entity = Node(
-        package='gazebo_ros',
-        executable='spawn_entity.py',
+        package='ros_gz_sim',
+        executable='create',
         arguments=['-topic', 'robot_description', '-entity', 'my_bot'],
         output='screen'
     )
@@ -78,6 +81,7 @@ def generate_launch_description():
 
 # --- 5. Return Final Launch Description ---
     return LaunchDescription([
+        rsp_launch,
         gazebo_launch, 
         spawn_entity,
         #spawn_world,
