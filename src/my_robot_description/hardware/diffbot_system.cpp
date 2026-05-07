@@ -219,8 +219,9 @@ hardware_interface::return_type DiffDriveArduinoHardware::read(
   {
     return hardware_interface::return_type::ERROR;
   }
-
-  comms_.read_sensor_values(wheel_l_.enc, wheel_r_.enc, imu_data_.linear_acceleration, imu_data_.angular_velocity, imu_data_.magnetic_field);
+ double pos_prev_l = wheel_l_.pos;
+  double pos_prev_r = wheel_r_.pos;
+  comms_.read_sensor_values(wheel_l_.pos, wheel_r_.pos, imu_data_.linear_acceleration, imu_data_.angular_velocity, imu_data_.magnetic_field);
   // normalize accelerometer
 double norm_a = std::sqrt(imu_data_.linear_acceleration[0]*imu_data_.linear_acceleration[0] + imu_data_.linear_acceleration[1]*imu_data_.linear_acceleration[1] + imu_data_.linear_acceleration[2]*imu_data_.linear_acceleration[2]);
 if (norm_a != 0.0) { imu_data_.linear_acceleration[0] /= norm_a; imu_data_.linear_acceleration[1] /= norm_a; imu_data_.linear_acceleration[2] /= norm_a; }
@@ -244,15 +245,15 @@ imu_data_.quarternion[2] = q.z();
 imu_data_.quarternion[3] = q.w();
 
   
+  
+  
+
   double delta_seconds = period.seconds();
 
-  double pos_prev = wheel_l_.pos;
-  wheel_l_.pos = wheel_l_.calc_enc_angle();
-  wheel_l_.vel = (wheel_l_.pos - pos_prev) / delta_seconds;
+  wheel_l_.vel = (wheel_l_.pos - pos_prev_l) / delta_seconds;
 
-  pos_prev = wheel_r_.pos;
-  wheel_r_.pos = wheel_r_.calc_enc_angle();
-  wheel_r_.vel = (wheel_r_.pos - pos_prev) / delta_seconds;
+  
+  wheel_r_.vel = (wheel_r_.pos - pos_prev_r) / delta_seconds;
 
   return hardware_interface::return_type::OK;
 }
