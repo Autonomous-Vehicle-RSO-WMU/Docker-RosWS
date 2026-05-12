@@ -50,14 +50,14 @@ struct Config
   int enc_counts_per_rev = 0;
   // int pid_o = 0;
 };
-struct ImuData
-{
-  double quarternion[4] = {0.0, 0.0, 0.0, 1.0};  // x, y, z, w
-  double euler_angles[3] = {0.0, 0.0, 0.0};  // roll, pitch, yaw
-  double angular_velocity[3] = {0.0, 0.0, 0.0};
-  double linear_acceleration[3] = {0.0, 0.0, 0.0};
-  double magnetic_field[3] = {0.0, 0.0, 0.0};
-} ;
+// struct ImuData
+// {
+//   double quarternion[4] = {0.0, 0.0, 0.0, 1.0};  // x, y, z, w
+//   double euler_angles[3] = {0.0, 0.0, 0.0};  // roll, pitch, yaw
+//   double angular_velocity[3] = {0.0, 0.0, 0.0};
+//   double linear_acceleration[3] = {0.0, 0.0, 0.0};
+//   double magnetic_field[3] = {0.0, 0.0, 0.0};
+// } ;
 
 
 public:
@@ -104,7 +104,7 @@ private:
   Config cfg_;
   Wheel wheel_l_;
   Wheel wheel_r_;
-  ImuData imu_data_;
+  // ImuData imu_data_;
 };
 
 }  // namespace my_robot_description

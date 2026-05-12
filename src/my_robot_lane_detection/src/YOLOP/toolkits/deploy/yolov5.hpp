@@ -5,7 +5,7 @@
 #include "cuda_utils.h"
 #include "logging.h"
 #include "utils.h"
-#include "calibrator.h"
+// #include "calibrator.h"
 
 #define USE_FP16  // set USE_INT8 or USE_FP16 or USE_FP32
 #define DEVICE 0  // GPU id
@@ -27,8 +27,11 @@ const char* OUTPUT_LANE_NAME = "lane";
 static Logger gLogger;
 
 ICudaEngine* build_engine(unsigned int maxBatchSize, IBuilder* builder, IBuilderConfig* config, DataType dt, std::string& wts_name) {
-    INetworkDefinition* network = builder->createNetworkV2(0U);
-
+    // INetworkDefinition* network = builder->createNetworkV2(0U);
+    bool explicitBatch = true;  // usually true in TRT10+
+INetworkDefinition* network = builder->createNetworkV2(
+    explicitBatch ? 1U << static_cast<uint32_t>(NetworkDefinitionCreationFlag::kEXPLICIT_BATCH) : 0U
+);
     // Create input tensor of shape {3, INPUT_H, INPUT_W} with name INPUT_BLOB_NAME
     ITensor* data = network->addInput(INPUT_BLOB_NAME, dt, Dims3{ 3, INPUT_H, INPUT_W });
     assert(data);
@@ -179,8 +182,10 @@ ICudaEngine* build_engine(unsigned int maxBatchSize, IBuilder* builder, IBuilder
     assert(false);
 
     // Build engine
-    builder->setMaxBatchSize(maxBatchSize);
-    config->setMaxWorkspaceSize(2L * (1L << 30));  // 2GB
+    // builder->setMaxBatchSize(maxBatchSize);
+    config->setMemoryPoolLimit(
+    nvinfer1::MemoryPoolType::kWORKSPACE, 2L * (1L << 30)  // 2GB
+);
 #if defined(USE_FP16)
     config->setFlag(BuilderFlag::kFP16);
 // #elif defined(USE_INT8)
@@ -192,11 +197,22 @@ ICudaEngine* build_engine(unsigned int maxBatchSize, IBuilder* builder, IBuilder
 #endif
 
     std::cout << "Building engine, please wait for a while..." << std::endl;
-    ICudaEngine* engine = builder->buildEngineWithConfig(*network, *config);
-    std::cout << "Build engine successfully!" << std::endl;
+    IHostMemory* serialized_network = builder->buildSerializedNetwork(*network, *config);
+    if (!serialized_network)
+    {
+        std::cerr << "Failed to create serialized network" << std::endl;
+        return nullptr;
+    }
 
-    // Don't need the network any more
-    network->destroy();
+    IRuntime* runtime = createInferRuntime(gLogger);
+    if (!runtime)
+    {
+        std::cerr << "Failed to create runtime" << std::endl;
+        return nullptr;
+    }
+
+    ICudaEngine* engine = runtime->deserializeCudaEngine(serialized_network->data(), serialized_network->size());
+    std::cout << "Build engine successfully!" << std::endl;
 
     // Release host memory
     for (auto& mem : weightMap)
@@ -219,16 +235,26 @@ void APIToModel(unsigned int maxBatchSize, IHostMemory** modelStream, std::strin
     // Serialize the engine
     (*modelStream) = engine->serialize();
 
-    // Close everything down
-    engine->destroy();
-    builder->destroy();
-    config->destroy();
+    delete engine;
+    delete builder;
+    delete config;
+
 }
 
 void doInference(IExecutionContext& context, cudaStream_t& stream, void **buffers, float* det_output, int* seg_output, int* lane_output, int batchSize) {
     // DMA input batch data to device, infer on the batch asynchronously, and DMA output back to host
     // CUDA_CHECK(cudaMemcpyAsync(buffers[0], input, batchSize * 3 * INPUT_H * INPUT_W * sizeof(float), cudaMemcpyHostToDevice, stream));
-    context.enqueue(batchSize, buffers, stream, nullptr);
+    if (!context.setTensorAddress(INPUT_BLOB_NAME, buffers[0]) ||
+        !context.setTensorAddress(OUTPUT_DET_NAME, buffers[1]) ||
+        !context.setTensorAddress(OUTPUT_SEG_NAME, buffers[2]) ||
+        !context.setTensorAddress(OUTPUT_LANE_NAME, buffers[3])) {
+        std::cerr << "Failed to set tensor addresses" << std::endl;
+        return;
+    }
+    if (!context.enqueueV3(stream)) {
+        std::cerr << "TensorRT enqueueV3 failed" << std::endl;
+        return;
+    }
     CUDA_CHECK(cudaMemcpyAsync(det_output, buffers[1], batchSize * OUTPUT_SIZE * sizeof(float), cudaMemcpyDeviceToHost, stream));
     CUDA_CHECK(cudaMemcpyAsync(seg_output, buffers[2], batchSize * IMG_H * IMG_W * sizeof(int), cudaMemcpyDeviceToHost, stream));
     CUDA_CHECK(cudaMemcpyAsync(lane_output, buffers[3], batchSize * IMG_H * IMG_W * sizeof(int), cudaMemcpyDeviceToHost, stream));
@@ -238,7 +264,17 @@ void doInference(IExecutionContext& context, cudaStream_t& stream, void **buffer
 void doInferenceCpu(IExecutionContext& context, cudaStream_t& stream, void **buffers, float* input, float* det_output, int* seg_output, int* lane_output, int batchSize) {
     // DMA input batch data to device, infer on the batch asynchronously, and DMA output back to host
     CUDA_CHECK(cudaMemcpyAsync(buffers[0], input, batchSize * 3 * INPUT_H * INPUT_W * sizeof(float), cudaMemcpyHostToDevice, stream));
-    context.enqueue(batchSize, buffers, stream, nullptr);
+    if (!context.setTensorAddress(INPUT_BLOB_NAME, buffers[0]) ||
+        !context.setTensorAddress(OUTPUT_DET_NAME, buffers[1]) ||
+        !context.setTensorAddress(OUTPUT_SEG_NAME, buffers[2]) ||
+        !context.setTensorAddress(OUTPUT_LANE_NAME, buffers[3])) {
+        std::cerr << "Failed to set tensor addresses" << std::endl;
+        return;
+    }
+    if (!context.enqueueV3(stream)) {
+        std::cerr << "TensorRT enqueueV3 failed" << std::endl;
+        return;
+    }
     CUDA_CHECK(cudaMemcpyAsync(det_output, buffers[1], batchSize * OUTPUT_SIZE * sizeof(float), cudaMemcpyDeviceToHost, stream));
     CUDA_CHECK(cudaMemcpyAsync(seg_output, buffers[2], batchSize * IMG_H * IMG_W * sizeof(int), cudaMemcpyDeviceToHost, stream));
     CUDA_CHECK(cudaMemcpyAsync(lane_output, buffers[3], batchSize * IMG_H * IMG_W * sizeof(int), cudaMemcpyDeviceToHost, stream));

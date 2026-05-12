@@ -89,7 +89,7 @@ public:
     string response = send_msg("\r");
   }
 
-  void read_sensor_values(double &enc_l, double &enc_r, double*accel, double*gyro, double*mag)
+  void read_sensor_values(double &enc_l, double &enc_r)//, double*accel, double*gyro, double*mag
   {
     string response = send_msg("e\r");
 
@@ -103,27 +103,27 @@ public:
 
     string token_1  = next_token();
     string token_2  = next_token();
-    string token_3  = next_token();
-    string token_4  = next_token();
-    string token_5  = next_token();
-    string token_6  = next_token();
-    string token_7  = next_token();
-    string token_8  = next_token();
-    string token_9  = next_token();
-    string token_10 = next_token();
-    string token_11 = next_token();
+    // string token_3  = next_token();
+    // string token_4  = next_token();
+    // string token_5  = next_token();
+    // string token_6  = next_token();
+    // string token_7  = next_token();
+    // string token_8  = next_token();
+    // string token_9  = next_token();
+    // string token_10 = next_token();
+    // string token_11 = next_token();
 
     enc_l    = atoi(token_1.c_str());
     enc_r    = atoi(token_2.c_str());
-    accel[0] = stof(token_3);
-    accel[1] = stof(token_4);
-    accel[2] = stof(token_5);
-    gyro[0]  = stof(token_6);
-    gyro[1]  = stof(token_7);
-    gyro[2]  = stof(token_8);
-    mag[0]   = stof(token_9);
-    mag[1]   = stof(token_10);
-    mag[2]   = stof(token_11);
+    // accel[0] = stof(token_3);
+    // accel[1] = stof(token_4);
+    // accel[2] = stof(token_5);
+    // gyro[0]  = stof(token_6);
+    // gyro[1]  = stof(token_7);
+    // gyro[2]  = stof(token_8);
+    // mag[0]   = stof(token_9);
+    // mag[1]   = stof(token_10);
+    // mag[2]   = stof(token_11);
 
     
   }

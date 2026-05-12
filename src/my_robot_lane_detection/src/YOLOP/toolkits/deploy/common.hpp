@@ -268,7 +268,7 @@ ILayer* preprocess_layer(INetworkDefinition *network, std::map<std::string, Weig
     // rescale
     auto rescale = network->addResize(input);
     rescale->setOutputDimensions(Dims3{ 3, Yolo::IMG_H, Yolo::IMG_W });
-    rescale->setResizeMode(ResizeMode::kLINEAR);
+    rescale->setResizeMode(InterpolationMode::kLINEAR);
     // normalize
     // long len = 3 * Yolo::IMG_H * Yolo::IMG_W;
     // float *normval = reinterpret_cast<float*>(malloc(sizeof(float) * len));

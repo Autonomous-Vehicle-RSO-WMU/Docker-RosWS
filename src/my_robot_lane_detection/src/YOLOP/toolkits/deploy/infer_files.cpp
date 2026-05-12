@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
             return -1;
         }
         p.write(reinterpret_cast<const char*>(modelStream->data()), modelStream->size());
-        modelStream->destroy();
+        delete modelStream;
         return 0;
     }
 
@@ -66,18 +66,12 @@ int main(int argc, char** argv) {
     IExecutionContext* context = engine->createExecutionContext();
     assert(context != nullptr);
     delete[] trtModelStream;
-    assert(engine->getNbBindings() == 4);
+
     void* buffers[4];
-    // In order to bind the buffers, we need to know the names of the input and output tensors.
-    // Note that indices are guaranteed to be less than IEngine::getNbBindings()
-    const int inputIndex = engine->getBindingIndex(INPUT_BLOB_NAME);
-    const int output_det_index = engine->getBindingIndex(OUTPUT_DET_NAME);
-    const int output_seg_index = engine->getBindingIndex(OUTPUT_SEG_NAME);
-    const int output_lane_index = engine->getBindingIndex(OUTPUT_LANE_NAME);
-    assert(inputIndex == 0);
-    assert(output_det_index == 1);
-    assert(output_seg_index == 2);
-    assert(output_lane_index == 3);
+    const int inputIndex = 0;
+    const int output_det_index = 1;
+    const int output_seg_index = 2;
+    const int output_lane_index = 3;
     // Create GPU buffers on device
     CUDA_CHECK(cudaMalloc(&buffers[inputIndex], BATCH_SIZE * 3 * INPUT_H * INPUT_W * sizeof(float)));
     CUDA_CHECK(cudaMalloc(&buffers[output_det_index], BATCH_SIZE * OUTPUT_SIZE * sizeof(float)));
@@ -192,9 +186,9 @@ int main(int argc, char** argv) {
     CUDA_CHECK(cudaFree(buffers[output_seg_index]));
     CUDA_CHECK(cudaFree(buffers[output_lane_index]));
     // Destroy the engine
-    context->destroy();
-    engine->destroy();
-    runtime->destroy();
+    delete context;
+    delete engine;
+    delete runtime;
 
     return 0;
 }

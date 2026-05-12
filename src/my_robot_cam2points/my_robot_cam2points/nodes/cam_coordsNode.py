@@ -6,7 +6,6 @@ import numpy as np
 from sensor_msgs.msg import NavSatFix,PointCloud2,PointField
 from std_msgs.msg import Float32
 from vision_msgs.msg import Detection2D
-import struct
 from yolop_lane_ros2.msg import LaneData
 
 
@@ -65,15 +64,9 @@ class cam_coordsNode(Node):
     # GPS & camera positions (meters)
     "camera_location": np.array([[0.25], [0], [1.01]]),
 
-    # camera distortion constants
-    "k1": 0,
-    "k2": 0,
-    "k3": 0,
-    "p1": 0,
-    "p2": 0,
     "camera_rotation_on_mount":0 ,
-    "camera_verticarotation":0,
-    "camera_tilt":0
+    "camera_verticarotation":35,
+
     }
       
 

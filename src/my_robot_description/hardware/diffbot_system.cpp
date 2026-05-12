@@ -112,38 +112,38 @@ std::vector<hardware_interface::StateInterface> DiffDriveArduinoHardware::export
     wheel_r_.name, hardware_interface::HW_IF_POSITION, &wheel_r_.pos));
   state_interfaces.emplace_back(hardware_interface::StateInterface(
     wheel_r_.name, hardware_interface::HW_IF_VELOCITY, &wheel_r_.vel));
-  state_interfaces.emplace_back(hardware_interface::StateInterface(
-    "imu_sensor", "orientation.x", &imu_data_.quarternion[0]));
-  state_interfaces.emplace_back(hardware_interface::StateInterface(
-    "imu_sensor", "orientation.y", &imu_data_.quarternion[1]));
-  state_interfaces.emplace_back(hardware_interface::StateInterface(
-    "imu_sensor", "orientation.z", &imu_data_.quarternion[2]));
-  state_interfaces.emplace_back(hardware_interface::StateInterface(
-    "imu_sensor", "orientation.w", &imu_data_.quarternion[3]));
-  state_interfaces.emplace_back(hardware_interface::StateInterface(
-    "imu_sensor", "angular_velocity.x", &imu_data_.angular_velocity[0]));
-  state_interfaces.emplace_back(hardware_interface::StateInterface(
-    "imu_sensor", "angular_velocity.y", &imu_data_.angular_velocity[1]));
-  state_interfaces.emplace_back(hardware_interface::StateInterface(
-    "imu_sensor", "angular_velocity.z", &imu_data_.angular_velocity[2]));
-  state_interfaces.emplace_back(hardware_interface::StateInterface(
-    "imu_sensor", "linear_acceleration.x", &imu_data_.linear_acceleration[0]));
-  state_interfaces.emplace_back(hardware_interface::StateInterface(
-    "imu_sensor", "linear_acceleration.y", &imu_data_.linear_acceleration[1]));
-  state_interfaces.emplace_back(hardware_interface::StateInterface(
-    "imu_sensor", "linear_acceleration.z", &imu_data_.linear_acceleration[2]));
-  state_interfaces.emplace_back(hardware_interface::StateInterface(
-    "imu_sensor", "magnetic_field.x", &imu_data_.magnetic_field[0]));
-  state_interfaces.emplace_back(hardware_interface::StateInterface(
-    "imu_sensor", "magnetic_field.y", &imu_data_.magnetic_field[1]));
-  state_interfaces.emplace_back(hardware_interface::StateInterface(
-    "imu_sensor", "magnetic_field.z", &imu_data_.magnetic_field[2]));
-  state_interfaces.emplace_back(hardware_interface::StateInterface(
-    "imu_sensor", "euler_angles.roll", &imu_data_.euler_angles[0]));
-  state_interfaces.emplace_back(hardware_interface::StateInterface(
-    "imu_sensor", "euler_angles.pitch", &imu_data_.euler_angles[1]));
-  state_interfaces.emplace_back(hardware_interface::StateInterface(
-    "imu_sensor", "euler_angles.yaw", &imu_data_.euler_angles[2]));
+  // state_interfaces.emplace_back(hardware_interface::StateInterface(
+  //   "imu_sensor", "orientation.x", &imu_data_.quarternion[0]));
+  // state_interfaces.emplace_back(hardware_interface::StateInterface(
+  //   "imu_sensor", "orientation.y", &imu_data_.quarternion[1]));
+  // state_interfaces.emplace_back(hardware_interface::StateInterface(
+  //   "imu_sensor", "orientation.z", &imu_data_.quarternion[2]));
+  // state_interfaces.emplace_back(hardware_interface::StateInterface(
+  //   "imu_sensor", "orientation.w", &imu_data_.quarternion[3]));
+  // state_interfaces.emplace_back(hardware_interface::StateInterface(
+  //   "imu_sensor", "angular_velocity.x", &imu_data_.angular_velocity[0]));
+  // state_interfaces.emplace_back(hardware_interface::StateInterface(
+  //   "imu_sensor", "angular_velocity.y", &imu_data_.angular_velocity[1]));
+  // state_interfaces.emplace_back(hardware_interface::StateInterface(
+  //   "imu_sensor", "angular_velocity.z", &imu_data_.angular_velocity[2]));
+  // state_interfaces.emplace_back(hardware_interface::StateInterface(
+  //   "imu_sensor", "linear_acceleration.x", &imu_data_.linear_acceleration[0]));
+  // state_interfaces.emplace_back(hardware_interface::StateInterface(
+  //   "imu_sensor", "linear_acceleration.y", &imu_data_.linear_acceleration[1]));
+  // state_interfaces.emplace_back(hardware_interface::StateInterface(
+  //   "imu_sensor", "linear_acceleration.z", &imu_data_.linear_acceleration[2]));
+  // state_interfaces.emplace_back(hardware_interface::StateInterface(
+  //   "imu_sensor", "magnetic_field.x", &imu_data_.magnetic_field[0]));
+  // state_interfaces.emplace_back(hardware_interface::StateInterface(
+  //   "imu_sensor", "magnetic_field.y", &imu_data_.magnetic_field[1]));
+  // state_interfaces.emplace_back(hardware_interface::StateInterface(
+  //   "imu_sensor", "magnetic_field.z", &imu_data_.magnetic_field[2]));
+  // state_interfaces.emplace_back(hardware_interface::StateInterface(
+  //   "imu_sensor", "euler_angles.roll", &imu_data_.euler_angles[0]));
+  // state_interfaces.emplace_back(hardware_interface::StateInterface(
+  //   "imu_sensor", "euler_angles.pitch", &imu_data_.euler_angles[1]));
+  // state_interfaces.emplace_back(hardware_interface::StateInterface(
+  //   "imu_sensor", "euler_angles.yaw", &imu_data_.euler_angles[2]));
 
   return state_interfaces;
 }
@@ -221,28 +221,28 @@ hardware_interface::return_type DiffDriveArduinoHardware::read(
   }
  double pos_prev_l = wheel_l_.pos;
   double pos_prev_r = wheel_r_.pos;
-  comms_.read_sensor_values(wheel_l_.pos, wheel_r_.pos, imu_data_.linear_acceleration, imu_data_.angular_velocity, imu_data_.magnetic_field);
+  comms_.read_sensor_values(wheel_l_.pos, wheel_r_.pos);// imu_data_.linear_acceleration, imu_data_.angular_velocity, imu_data_.magnetic_field)
   // normalize accelerometer
-double norm_a = std::sqrt(imu_data_.linear_acceleration[0]*imu_data_.linear_acceleration[0] + imu_data_.linear_acceleration[1]*imu_data_.linear_acceleration[1] + imu_data_.linear_acceleration[2]*imu_data_.linear_acceleration[2]);
-if (norm_a != 0.0) { imu_data_.linear_acceleration[0] /= norm_a; imu_data_.linear_acceleration[1] /= norm_a; imu_data_.linear_acceleration[2] /= norm_a; }
+// double norm_a = std::sqrt(imu_data_.linear_acceleration[0]*imu_data_.linear_acceleration[0] + imu_data_.linear_acceleration[1]*imu_data_.linear_acceleration[1] + imu_data_.linear_acceleration[2]*imu_data_.linear_acceleration[2]);
+// if (norm_a != 0.0) { imu_data_.linear_acceleration[0] /= norm_a; imu_data_.linear_acceleration[1] /= norm_a; imu_data_.linear_acceleration[2] /= norm_a; }
 
-double pitch = std::asin(-imu_data_.linear_acceleration[0]);
-double roll  = std::atan2(imu_data_.linear_acceleration[1], imu_data_.linear_acceleration[2]);
+// double pitch = std::asin(-imu_data_.linear_acceleration[0]);
+// double roll  = std::atan2(imu_data_.linear_acceleration[1], imu_data_.linear_acceleration[2]);
 
-double my_1 = imu_data_.magnetic_field[1] * std::cos(roll)  - imu_data_.magnetic_field[2] * std::sin(roll);
-double mz_1 = imu_data_.magnetic_field[1] * std::sin(roll)  + imu_data_.magnetic_field[2] * std::cos(roll);
-double mx_1 = imu_data_.magnetic_field[0] * std::cos(pitch) + mz_1 * std::sin(pitch);
+// double my_1 = imu_data_.magnetic_field[1] * std::cos(roll)  - imu_data_.magnetic_field[2] * std::sin(roll);
+// double mz_1 = imu_data_.magnetic_field[1] * std::sin(roll)  + imu_data_.magnetic_field[2] * std::cos(roll);
+// double mx_1 = imu_data_.magnetic_field[0] * std::cos(pitch) + mz_1 * std::sin(pitch);
 
-double yaw = std::atan2(-my_1, mx_1);
-imu_data_.euler_angles[0] = roll;
-imu_data_.euler_angles[1] = pitch;
-imu_data_.euler_angles[2] = yaw;
-tf2::Quaternion q;
-q.setRPY(roll, pitch, yaw);
-imu_data_.quarternion[0] = q.x();
-imu_data_.quarternion[1] = q.y();
-imu_data_.quarternion[2] = q.z();
-imu_data_.quarternion[3] = q.w();
+// double yaw = std::atan2(-my_1, mx_1);
+// imu_data_.euler_angles[0] = roll;
+// imu_data_.euler_angles[1] = pitch;
+// imu_data_.euler_angles[2] = yaw;
+// tf2::Quaternion q;
+// q.setRPY(roll, pitch, yaw);
+// imu_data_.quarternion[0] = q.x();
+// imu_data_.quarternion[1] = q.y();
+// imu_data_.quarternion[2] = q.z();
+// imu_data_.quarternion[3] = q.w();
 
   
   
