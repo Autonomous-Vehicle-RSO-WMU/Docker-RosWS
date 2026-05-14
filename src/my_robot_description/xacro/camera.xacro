@@ -3,15 +3,17 @@
 
     <joint name="camera_joint" type="fixed">
         <parent link="base_link"/>
-        <child link="camera_link"/>
-        <origin xyz="0.25 0 1.14" rpy="0 0.6283 0"/>
+        <child link="zed_camera_link"/>
+        <origin xyz="0.381 0 1.01" rpy="0 0.6283 0"/>
     </joint>
     <joint name="camera_joint_rear" type="fixed">
         <parent link="base_link"/>
-        <child link="camera_link_rear"/>
-        <origin xyz="0.381 0 1.01" rpy="0 0.5934 ${pi}"/>
+        <child link="zed_rear_camera_link"/>
+        <origin xyz="0.25 0 1.14" rpy="0 0.5934 ${pi}"/>
     </joint>
-    <link name="camera_link">
+    <link name="zed_camera_link"></link>
+    <link name="zed_rear_camera_link"></link>
+    <!-- <link name="camera_link">
         <visual>
             <geometry>
                 <box size="0.010 0.03 0.03"/>
@@ -42,9 +44,9 @@
         <xacro:inertial_box mass="0.1" x="0.01" y="0.3" z="0.3">
             <origin xyz="0 0 0" rpy="0 0 0"/>
         </xacro:inertial_box>
-    </link>
+    </link> -->
 
-    <joint name="camera_optical_joint" type="fixed">
+    <!-- <joint name="camera_optical_joint" type="fixed">
         <parent link="camera_link"/>
         <child link="camera_link_optical"/>
         <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
@@ -58,7 +60,7 @@
         <child link="camera_link_optical_rear"/>
         <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
     </joint>
-    <link name="camera_link_optical_rear"></link>
+    <link name="camera_link_optical_rear"></link> -->
     <xacro:if value="$(arg sim_mode)">
         <gazebo reference="camera_link">
             <material>Gazebo/Red</material>

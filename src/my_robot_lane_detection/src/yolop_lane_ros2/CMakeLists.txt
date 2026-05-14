@@ -19,7 +19,7 @@ install(PROGRAMS
 )
 
 install(PROGRAMS
-  yolop_lane_ros2/video_pub.py
+  yolop_lane_ros2/testing_video_pub.py
   DESTINATION lib/${PROJECT_NAME}
   RENAME video_pub
 )

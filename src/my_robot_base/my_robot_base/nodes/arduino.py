@@ -96,9 +96,14 @@ def main():
     print('Hi from igvc_bot_arduino_sensors.')
     rclpy.init()
     serial_node=arduino()
-    rclpy.spin(serial_node)
-    serial_node.destroy_node()
-    rclpy.shutdown()
+    try:
+        rclpy.spin(serial_node)
+    except (KeyboardInterrupt, rclpy.executors.ExternalShutdownException):
+        pass
+    finally:
+        serial_node.destroy_node()
+        if rclpy.ok():
+            rclpy.shutdown()
 
 
 if __name__ == '__main__':

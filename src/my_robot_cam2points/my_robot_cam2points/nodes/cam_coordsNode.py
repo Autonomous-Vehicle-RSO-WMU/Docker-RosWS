@@ -1,13 +1,13 @@
 import rclpy
 import numpy as np
-import  depend.cam_dependencies as cam_dependencies
+import  my_robot_cam2points.depend.cam_dependencies as cam_dependencies
 from rclpy.node import Node
 import numpy as np
 from sensor_msgs.msg import NavSatFix,PointCloud2,PointField
 from std_msgs.msg import Float32
 from vision_msgs.msg import Detection2D
 from yolop_lane_ros2.msg import LaneData
-
+from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
 
 #These are the functions that will be used by the node to make Camera to Coords.
 #The node has not been created to allow me to accomodate to subscribing to the nodes to get depth and lane line data
@@ -21,36 +21,42 @@ from yolop_lane_ros2.msg import LaneData
 class cam_coordsNode(Node):
     def __init__(self):
         super().__init__('camtocoords')
+        qos_profile = QoSProfile(
+            reliability=QoSReliabilityPolicy.RELIABLE,
+            history=QoSHistoryPolicy.KEEP_LAST,
+            depth=10
+        )
 
         self.lanecoordspublisher_L = self.create_publisher(
             PointCloud2,
             '/relative_lanecoords_L',
-            10
+            qos_profile
         )
-        self.lanecoordspublisher_L = self.create_publisher(
+        self.lanecoordspublisher_R = self.create_publisher(
             PointCloud2,
-            '/relative_lanecoords_L',
-            10
+            '/relative_lanecoords_R',
+            qos_profile
         )
         
         self.pothole = self.create_publisher(
              PointCloud2,
              'waypoint',
-             10
+             qos_profile
          )
 
         self.lanedetectionsubscription = self.create_subscription(
             LaneData,          # message type we're receiving
             'overlay_data',          # no topic name because no working node yet
             self.camLane_callback,  # callback when message arrives
-            10                  # queue size / history depth
+            qos_profile
         )
         
 
         self.cam2dsubscription=self.create_subscription(
             Detection2D(),
             "/camera/detections2d",
-            self.objcallback
+            self.objcallback,
+            qos_profile
         )
 
         self.camDetails={
@@ -65,7 +71,7 @@ class cam_coordsNode(Node):
     "camera_location": np.array([[0.25], [0], [1.01]]),
 
     "camera_rotation_on_mount":0 ,
-    "camera_verticarotation":35,
+    "camera_verticalrotation":35,
 
     }
       
@@ -101,9 +107,8 @@ class cam_coordsNode(Node):
     def camLane_callback(self,msg):
         L=([[],[],[]])
         R=([[],[],[]])
-        N,E,_=cam_dependencies.cam_to_coords(self.camDetails,msg.left_lane_x,msg.left_lane_y,self.orientation[0],self.orientation[1],self.orientation[2])
-        N2,E2,_=cam_dependencies.cam_to_coords(self.camDetails,msg.right_lane_x,msg.right_lane_y,self.orientation[0],self.orientation[1],self.orientation[2])
-        
+        N,E,_=cam_dependencies.cam_to_coords(self.camDetails,np.array(msg.left_lane_x),np.array(msg.left_lane_y))
+        N2,E2,_=cam_dependencies.cam_to_coords(self.camDetails,np.array(msg.right_lane_x),np.array(msg.right_lane_y)  )
 
         for x in range (len(N)):
             L[0].append(N[x])
@@ -115,10 +120,10 @@ class cam_coordsNode(Node):
             R[2].append(0)
         L= zip(L[0], L[1], L[2])
         R= zip(R[0], R[1], R[2]) 
-        L_cloud=cam_dependencies.make_cloud(L)
-        R_cloud=cam_dependencies.make_cloud(R)
-        self.lanecoordspublisher_L.publish(self,L_cloud)
-        self.lanecoordspublisher_R.publish(self,R_cloud)
+        L_cloud=cam_dependencies.make_cloud(self,L)
+        R_cloud=cam_dependencies.make_cloud(self,R)
+        self.lanecoordspublisher_L.publish(L_cloud)
+        self.lanecoordspublisher_R.publish(R_cloud)
 
 
 # Entry point of the program
