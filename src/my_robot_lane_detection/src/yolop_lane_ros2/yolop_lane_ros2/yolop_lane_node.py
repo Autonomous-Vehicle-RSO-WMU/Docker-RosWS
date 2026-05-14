@@ -150,7 +150,7 @@ class YolopLaneNode(Node):
         # -----------------------------
         # Parameters
         # -----------------------------
-        self.declare_parameter("image_topic", "/camera/image_raw")
+        self.declare_parameter("image_topic", "/zed/zed_node/left/image_rect_color")
         self.declare_parameter(
             "weights",
             os.path.expanduser("~/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/weights/End-to-end.pth")

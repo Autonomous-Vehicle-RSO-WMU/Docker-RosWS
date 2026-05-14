@@ -1,7 +1,7 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String,Float32
-# from sensor_msgs.msg import Imu,MagneticField,
+from sensor_msgs.msg import Imu,MagneticField
 from sensor_msgs.msg import NavSatFix,NavSatStatus
 
 import serial 
@@ -13,7 +13,7 @@ class arduino(Node):
             super().__init__('arduino_node_ros')
 
             # --- 1. Declare Parameters ---
-            self.declare_parameter('port', '/dev/serial/by-id/usb-Arduino__www.arduino.cc__0043_55936343833351518161-if00')
+            self.declare_parameter('port', '/dev/serial/by-id/usb-Arduino__www.arduino.cc__0042_14532303232351F050C0-if00')
             self.declare_parameter('baudrate', 115200)
         
             # --- 2. Get Params Sent by Launch/Config ---
@@ -24,8 +24,8 @@ class arduino(Node):
             self.arduinoData = serial.Serial(port_name, baud_rate)
 
             self.timer = self.create_timer(0.2, self.timer_callback)  # 20 Hz #TODO: This is not actually 20hz, but 5hz. Change to .05 for 20hz. 
-            # self.IMUpublisher=self.create_publisher(Imu,'/imu/data',10)
-            # self.Magnetopublisher=self.create_publisher(MagneticField,'/imu/mag',10)
+            self.IMUpublisher=self.create_publisher(Imu,'/imu/data',10)
+            self.Magnetopublisher=self.create_publisher(MagneticField,'/imu/mag',10)
             self.gps_publisher = self.create_publisher(NavSatFix, '/gps/fix', 10)
         def timer_callback(self): #TODO: THIS IS MISSING AN ELSE CATCH!!!!!
                if self.arduinoData.in_waiting:

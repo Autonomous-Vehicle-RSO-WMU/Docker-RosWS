@@ -4,12 +4,12 @@
     <joint name="camera_joint" type="fixed">
         <parent link="base_link"/>
         <child link="camera_link"/>
-        <origin xyz="0.25 0 1.01" rpy="0 0.6283 0"/>
+        <origin xyz="0.25 0 1.14" rpy="0 0.6283 0"/>
     </joint>
     <joint name="camera_joint_rear" type="fixed">
         <parent link="base_link"/>
         <child link="camera_link_rear"/>
-        <origin xyz="0.381 0 1.14" rpy="0 0.5934 ${pi}"/>
+        <origin xyz="0.381 0 1.01" rpy="0 0.5934 ${pi}"/>
     </joint>
     <link name="camera_link">
         <visual>
