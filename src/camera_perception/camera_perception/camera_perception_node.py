@@ -77,7 +77,7 @@ class CameraPerceptionNode(Node):
         self.declare_parameter('frames.camera_frame', 'zed_left_camera_optical_frame')
 
         # Topics
-        self.declare_parameter('topics.camera_image', '/zed/zed_node/left/image_rect_color')
+        self.declare_parameter('topics.camera_image', '/zed/zed_node/left/color/rect/image')
         self.declare_parameter('topics.detections2d_out', '/camera/detections2d')
         self.declare_parameter('topics.debug_image_out', '/camera/debug_image')
 

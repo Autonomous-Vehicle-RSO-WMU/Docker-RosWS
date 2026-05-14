@@ -15,6 +15,7 @@ def generate_launch_description():
     camera_pkg_share = get_package_share_directory('camera_perception')
     rviz_config_default = str(Path(camera_pkg_share) / 'config' / 'rviz_camera.rviz')
     camera_config = str(Path(camera_pkg_share) / 'config' / 'camera_perception.yaml')
+    zed_override = str(Path(camera_pkg_share) / 'config' / 'zed_override.yaml')
 
     camera_model = LaunchConfiguration('camera_model')
     rviz_config = LaunchConfiguration('rviz_config')
@@ -36,7 +37,7 @@ def generate_launch_description():
         ),
         launch_arguments={
             'camera_model': camera_model,
-            'publish_left_right': 'true',
+            'ros_params_override_path': zed_override,
         }.items()
     )
 

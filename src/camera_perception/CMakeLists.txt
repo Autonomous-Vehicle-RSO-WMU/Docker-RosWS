@@ -18,7 +18,11 @@ install(PROGRAMS
   RENAME zed_od_adapter_node
 )
 
-install(DIRECTORY config launch resource models
+install(DIRECTORY
+  config
+  launch
+  resource
+  models
   DESTINATION share/${PROJECT_NAME}
 )
 

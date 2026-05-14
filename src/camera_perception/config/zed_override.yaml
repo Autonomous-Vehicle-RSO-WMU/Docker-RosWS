@@ -1,0 +1,4 @@
+/**:
+    ros__parameters:
+        video:
+            publish_left_right: true
