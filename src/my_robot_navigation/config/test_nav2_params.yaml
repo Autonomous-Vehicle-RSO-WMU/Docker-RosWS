@@ -1,0 +1,419 @@
+# =============================================================================
+# Nav2 Parameters — Corrected Configuration
+# Robot:  my_robot  (Differential Drive, Ouster LiDAR, IGVC 2026)
+# Setup:  MAPLESS — no static map, no AMCL.
+#         Localisation is provided by robot_localization EKF (odom frame only).
+#         Both costmaps therefore use global_frame: odom.
+#
+# Key corrections vs nav2_params.yaml:
+#   • global_costmap now uses global_frame: odom (was: map — breaks mapless)
+#   • Sensor topic changed from "fused_cloud" (never published as PointCloud2)
+#     to /lidar/debug_cloud (filtered PointCloud2 from lidar_perception_node)
+#     plus /relative_lanecoords_L from my_robot_cam2points
+#   • Switched from VoxelLayer (3-D) for 3-D lidar data, ObstacleLayer (2-D)
+#     for lane markings — matches sensor types correctly
+#   • RPP controller fixed for differential drive:
+#       – removed Ackermann-only params (wheel_base, max_steering_angle,
+#         steering_angle_velocity, command_topic)
+#       – odom_topic & cmd_vel_topic belong at controller_server level
+#   • Added required controller_server top-level fields (controller_frequency,
+#     progress_checker_plugin, goal_checker_plugins)
+#   • behavior_server now has all required params (costmap_topic,
+#     footprint_topic, cycle_frequency, transform_tolerance, …)
+#   • planner plugin path corrected to nav2_navfn_planner/NavfnPlanner
+#   • bt_navigator has a complete set of BT action/condition nodes
+#   • costmap update_frequency / publish_frequency added throughout
+#   • clearing & marking flags added to every observation source
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# LOCAL COSTMAP
+# Used by the controller_server for immediate obstacle avoidance.
+# Rolls with the robot.  Uses odom frame so it stays coherent with EKF output.
+# ---------------------------------------------------------------------------
+local_costmap:
+  ros__parameters:
+
+    # --- Coordinate frames ---
+    # odom is the only world-fixed frame available in a mapless setup.
+    global_frame: odom
+    robot_base_frame: base_link
+
+    # --- Grid size ---
+    rolling_window: true   # Always centred on the robot
+    width: 10              # metres
+    height: 10             # metres
+    resolution: 0.05       # metres/cell  (finer than global for local accuracy)
+
+    # --- Update rates ---
+    update_frequency: 10.0    # Hz — how often sensor data is integrated
+    publish_frequency: 5.0    # Hz — how often the costmap is published for viz
+
+    # --- Robot footprint ---
+    # Approximate the diff-drive chassis as a circle (wheel_separation ≈ 0.541 m)
+    robot_radius: 0.35        # metres — conservative outer radius of chassis
+
+    # --- Costmap layers ---
+    # VoxelLayer: 3-D lidar → marks/clears cells volumetrically
+    # ObstacleLayer: 2-D lane-marking clouds → marks lane boundaries as lethal
+    # InflationLayer: inflates all lethal cells to create a cost gradient
+    plugins: ["voxel_layer", "lane_layer", "inflation_layer"]
+
+    # --- VoxelLayer (3-D lidar obstacles) ---
+    # Source: /lidar/debug_cloud — ground-filtered, range-bounded PointCloud2
+    # published by lidar_perception_node.  Using the filtered cloud keeps
+    # ground returns out of the costmap.
+    voxel_layer:
+      plugin: "nav2_costmap_2d::VoxelLayer"
+      enabled: true
+      publish_voxel_map: false        # disable for performance (enable to debug)
+      origin_z: 0.0
+      z_resolution: 0.05             # metres per voxel (vertical)
+      z_voxels: 16                   # vertical voxels (0 – 0.8 m above origin_z)
+      max_obstacle_height: 2.0       # metres — ignore returns above this
+      mark_threshold: 0              # voxels needed to mark a column as occupied
+      observation_sources: lidar_cloud
+      lidar_cloud:
+        topic: /lidar/debug_cloud    # filtered PointCloud2 from lidar_perception_node
+        data_type: "PointCloud2"
+        sensor_frame: base_link      # lidar_perception transforms into base_link
+        max_obstacle_height: 2.0
+        min_obstacle_height: 0.05   # ignore near-ground noise
+        clearing: true               # raycast to clear free space
+        marking: true                # mark occupied cells
+        raytrace_max_range: 10.0
+        raytrace_min_range: 0.1
+        obstacle_max_range: 8.0
+        obstacle_min_range: 0.1
+
+    # --- ObstacleLayer (2-D lane boundary point clouds) ---
+    # Source: /relative_lanecoords_L — PointCloud2 published by
+    # my_robot_cam2points/cam_coordsNode.  Treats painted lane lines as
+    # lethal obstacles so the planner stays between them.
+    # NOTE: cam_coordsNode currently publishes only _L (left lane).
+    #       Add right_lane back when the _R publisher is fixed in that node.
+    lane_layer:
+      plugin: "nav2_costmap_2d::ObstacleLayer"
+      enabled: true
+      observation_sources: left_lane
+      left_lane:
+        topic: /relative_lanecoords_L
+        data_type: "PointCloud2"
+        sensor_frame: base_link
+        clearing: true
+        marking: true
+        obstacle_max_range: 8.0
+        obstacle_min_range: 0.0
+
+    # --- InflationLayer ---
+    inflation_layer:
+      plugin: "nav2_costmap_2d::InflationLayer"
+      cost_scaling_factor: 3.0   # steepness of cost gradient away from obstacles
+      inflation_radius: 0.55     # metres — buffer around lethal cells
+
+    always_send_full_costmap: true  # full grid each update (useful for debugging)
+
+# ---------------------------------------------------------------------------
+# GLOBAL COSTMAP
+# Used by the planner_server to compute the long-horizon path.
+# Also rolls (no static map), uses odom frame for the same reason as local.
+# Coarser resolution and larger footprint to cover the planning horizon.
+# ---------------------------------------------------------------------------
+global_costmap:
+  ros__parameters:
+
+    global_frame: odom          # MUST match local — no map→odom TF exists
+    robot_base_frame: base_link
+
+    rolling_window: true
+    width: 50
+    height: 50
+    resolution: 0.1             # coarser than local is fine for global planning
+
+    update_frequency: 5.0
+    publish_frequency: 2.0
+
+    robot_radius: 0.35
+
+    track_unknown_space: true   # plan through unknown cells (no prior map)
+
+    plugins: ["voxel_layer", "lane_layer", "inflation_layer"]
+
+    voxel_layer:
+      plugin: "nav2_costmap_2d::VoxelLayer"
+      enabled: true
+      publish_voxel_map: false
+      origin_z: 0.0
+      z_resolution: 0.05
+      z_voxels: 16
+      max_obstacle_height: 2.0
+      mark_threshold: 0
+      observation_sources: lidar_cloud
+      lidar_cloud:
+        topic: /lidar/debug_cloud
+        data_type: "PointCloud2"
+        sensor_frame: base_link
+        max_obstacle_height: 2.0
+        min_obstacle_height: 0.05
+        clearing: true
+        marking: true
+        raytrace_max_range: 20.0
+        raytrace_min_range: 0.1
+        obstacle_max_range: 18.0
+        obstacle_min_range: 0.1
+
+    lane_layer:
+      plugin: "nav2_costmap_2d::ObstacleLayer"
+      enabled: true
+      observation_sources: left_lane
+      left_lane:
+        topic: /relative_lanecoords_L
+        data_type: "PointCloud2"
+        sensor_frame: base_link
+        clearing: true
+        marking: true
+        obstacle_max_range: 18.0
+        obstacle_min_range: 0.0
+
+    inflation_layer:
+      plugin: "nav2_costmap_2d::InflationLayer"
+      cost_scaling_factor: 3.0
+      inflation_radius: 0.55
+
+    always_send_full_costmap: true
+
+# ---------------------------------------------------------------------------
+# PLANNER SERVER
+# Computes a global path from current pose to goal waypoint.
+# NavFnPlanner uses a wavefront / Dijkstra-like algorithm.
+# ---------------------------------------------------------------------------
+planner_server:
+  ros__parameters:
+    expected_planner_frequency: 10.0
+
+    # Key fix: "plugins" (Humble API) not the old "planner_plugins"
+    plugins: ["GridBased"]
+
+    GridBased:
+      # Key fix: plugin path uses "/" not "::"
+      plugin: "nav2_navfn_planner/NavfnPlanner"
+      tolerance: 0.5       # metres — acceptable deviation from exact goal pose
+      use_astar: true      # A* is faster than Dijkstra for outdoor long-range
+      allow_unknown: true  # allow planning through unseen cells (no prior map)
+
+# ---------------------------------------------------------------------------
+# CONTROLLER SERVER
+# Executes the path produced by planner_server using a local controller.
+#
+# Controller choice — Regulated Pure Pursuit (RPP):
+#   RPP outputs geometry_msgs/Twist on cmd_vel for differential-drive robots.
+#   The previous config mistakenly added Ackermann-only params (wheel_base,
+#   max_steering_angle, steering_angle_velocity, command_topic).  Those params
+#   are not part of the standard RPP plugin and must be removed.
+#
+#   odom_topic and cmd_vel_topic are controller_server-level params, not
+#   plugin-level params, and are placed here accordingly.
+# ---------------------------------------------------------------------------
+controller_server:
+  ros__parameters:
+
+    controller_frequency: 20.0          # Hz — control loop rate
+    odom_topic: odom                    # odometry source (EKF output)
+    cmd_vel_topic: cmd_vel              # Twist published to diff_drive_controller
+
+    # Threshold below which velocity is considered "stopped"
+    min_x_velocity_threshold: 0.001
+    min_y_velocity_threshold: 0.5       # large because robot cannot move sideways
+    min_theta_velocity_threshold: 0.001
+
+    # Progress / goal checking
+    progress_checker_plugin: "progress_checker"
+    goal_checker_plugins: ["goal_checker"]
+    controller_plugins: ["RPP"]
+
+    # --- Progress checker ---
+    progress_checker:
+      plugin: "nav2_controller::SimpleProgressChecker"
+      required_movement_radius: 0.3     # metres — must move this far within…
+      movement_time_allowance: 15.0     # …this many seconds, or declare stuck
+
+    # --- Goal checker ---
+    goal_checker:
+      plugin: "nav2_controller::SimpleGoalChecker"
+      stateful: true
+      xy_goal_tolerance: 0.5            # metres — IGVC waypoint tolerance
+      yaw_goal_tolerance: 3.14159       # radians — any heading is fine at waypoint
+
+    # --- Regulated Pure Pursuit controller (diff-drive) ---
+    RPP:
+      plugin: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"
+
+      # Velocity targets (match IGVC speed envelope)
+      desired_linear_vel: 1.5           # m/s — cruise speed
+      min_approach_linear_velocity: 0.1 # m/s — slow-approach near goal
+      approach_velocity_scaling_dist: 1.0  # m — begin slowing this far from goal
+
+      # Lookahead (velocity-scaled for smoother curves at speed)
+      use_velocity_scaled_lookahead_dist: true
+      lookahead_time: 1.5               # seconds — gain for velocity scaling
+      min_lookahead_dist: 1.0           # metres
+      max_lookahead_dist: 5.0           # metres
+
+      # Regulated velocity scaling (slows in curves / near obstacles)
+      use_regulated_linear_velocity_scaling: true
+      use_cost_regulated_linear_velocity_scaling: true
+      regulated_linear_scaling_min_radius: 0.9
+      regulated_linear_scaling_min_speed: 0.25
+      cost_scaling_dist: 0.6
+      cost_scaling_gain: 1.0
+      inflation_cost_scaling_factor: 3.0
+
+      # Rotation to heading before following path
+      use_rotate_to_heading: true
+      rotate_to_heading_min_angle: 0.785  # radians — ~45° threshold
+      rotate_to_heading_angular_vel: 0.8  # rad/s
+      max_angular_accel: 3.2              # rad/s²
+
+      # Safety
+      use_collision_detection: true
+      max_allowed_time_to_collision_up_to_carrot: 1.0
+      max_robot_pose_search_dist: 10.0    # metres from path before controller aborts
+
+      allow_reversing: false
+      transform_tolerance: 0.1
+
+# ---------------------------------------------------------------------------
+# BEHAVIOR SERVER
+# Provides recovery behaviors (spin, backup, wait).
+# All required params are now present.
+# ---------------------------------------------------------------------------
+behavior_server:
+  ros__parameters:
+
+    # Topics the behavior server reads from the local costmap
+    costmap_topic: local_costmap/costmap_raw
+    footprint_topic: local_costmap/published_footprint
+
+    cycle_frequency: 10.0         # Hz — behavior execution loop
+    transform_tolerance: 0.1      # seconds
+
+    global_frame: odom
+    robot_base_frame: base_link
+
+    simulate_ahead_time: 2.0      # seconds — collision-check window for backup/spin
+
+    # Rotational limits for the Spin behavior
+    max_rotational_vel: 1.0       # rad/s
+    min_rotational_vel: 0.4       # rad/s
+    rotational_acc_lim: 3.2       # rad/s²
+
+    # Key fix: "plugins" not the old "behavior_plugins"
+    plugins: ["spin", "backup", "wait"]
+
+    spin:
+      plugin: "nav2_behaviors/Spin"
+
+    backup:
+      plugin: "nav2_behaviors/BackUp"
+
+    wait:
+      plugin: "nav2_behaviors/Wait"
+
+# ---------------------------------------------------------------------------
+# BEHAVIOR TREE NAVIGATOR
+# Orchestrates planner_server, controller_server, and behavior_server via a
+# behavior tree.  A comprehensive plugin list enables built-in recovery trees.
+# ---------------------------------------------------------------------------
+bt_navigator:
+  ros__parameters:
+
+    global_frame: odom
+    robot_base_frame: base_link
+    odom_topic: odom
+    bt_loop_duration: 10           # ms — BT tick rate
+    default_server_timeout: 20     # seconds
+    wait_for_service_timeout: 1000 # ms
+
+    # nav2_bt_navigator/navigate_to_pose_w_replanning_and_recovery.xml is used
+    # by default for NavigateToPose actions — this tree covers replanning and
+    # spin/backup/wait recoveries automatically.
+
+    plugin_lib_names:
+      # --- Path planning ---
+      - nav2_compute_path_to_pose_action_bt_node
+      - nav2_compute_path_through_poses_action_bt_node
+      # --- Path following ---
+      - nav2_follow_path_action_bt_node
+      # --- Path smoothing ---
+      - nav2_smooth_path_action_bt_node
+      # --- Recovery behaviors ---
+      - nav2_spin_action_bt_node
+      - nav2_wait_action_bt_node
+      - nav2_back_up_action_bt_node
+      - nav2_drive_on_heading_bt_node
+      # --- Costmap clearing ---
+      - nav2_clear_costmap_service_bt_node
+      # --- Conditions ---
+      - nav2_is_stuck_condition_bt_node
+      - nav2_goal_reached_condition_bt_node
+      - nav2_goal_updated_condition_bt_node
+      - nav2_globally_updated_goal_condition_bt_node
+      - nav2_is_path_valid_condition_bt_node
+      - nav2_initial_pose_received_condition_bt_node
+      # --- Control flow ---
+      - nav2_reinitialize_global_localization_service_bt_node
+      - nav2_rate_controller_bt_node
+      - nav2_distance_controller_bt_node
+      - nav2_speed_controller_bt_node
+      - nav2_truncate_path_action_bt_node
+      - nav2_truncate_path_local_action_bt_node
+      - nav2_goal_updater_node_bt_node
+      - nav2_recovery_node_bt_node
+      - nav2_pipeline_sequence_bt_node
+      - nav2_round_robin_node_bt_node
+      - nav2_transform_available_condition_bt_node
+      - nav2_time_expired_condition_bt_node
+      - nav2_distance_traveled_condition_bt_node
+      - nav2_single_trigger_bt_node
+      - nav2_navigate_to_pose_action_bt_node
+      - nav2_navigate_through_poses_action_bt_node
+      - nav2_remove_passed_goals_action_bt_node
+      - nav2_planner_selector_bt_node
+      - nav2_controller_selector_bt_node
+      - nav2_goal_checker_selector_bt_node
+      - nav2_controller_cancel_bt_node
+      - nav2_path_longer_on_approach_bt_node
+      - nav2_wait_cancel_bt_node
+      - nav2_spin_cancel_bt_node
+      - nav2_back_up_cancel_bt_node
+
+# ---------------------------------------------------------------------------
+# WAYPOINT FOLLOWER
+# Sequences through a list of GPS/map waypoints (used by IGVC mission node).
+# ---------------------------------------------------------------------------
+waypoint_follower:
+  ros__parameters:
+    loop_rate: 20
+    stop_on_failure: false
+    waypoint_task_executor_plugin: "wait_at_waypoint"
+    wait_at_waypoint:
+      plugin: "nav2_waypoint_follower::WaitAtWaypoint"
+      enabled: true
+      waypoint_pause_duration: 0    # ms — no pause between IGVC gates
+
+# ---------------------------------------------------------------------------
+# VELOCITY SMOOTHER  (optional, reduces jerky cmd_vel commands)
+# ---------------------------------------------------------------------------
+velocity_smoother:
+  ros__parameters:
+    smoothing_frequency: 20.0
+    scale_velocities: false
+    feedback: "OPEN_LOOP"
+    max_velocity: [1.5, 0.0, 1.5]    # [vx, vy, vtheta] — matches desired_linear_vel
+    min_velocity: [-0.5, 0.0, -1.5]
+    max_accel:  [2.0, 0.0, 3.2]
+    max_decel: [-2.0, 0.0, -3.2]
+    odom_topic: odom
+    odom_duration: 0.1
+    deadband_velocity: [0.0, 0.0, 0.0]
+    velocity_timeout: 1.0
