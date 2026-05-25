@@ -90,7 +90,7 @@ def make_cloud(node,points):
     cloud.header.frame_id='base_link'
     cloud.header.stamp = node.get_clock().now().to_msg()
     cloud.height = 1
-    cloud.width = len(points)
+    cloud.width = len(list(points))
     cloud.fields = [
         PointField(name='x', offset=0,  datatype=PointField.FLOAT32, count=1),
         PointField(name='y', offset=4,  datatype=PointField.FLOAT32, count=1),
@@ -98,6 +98,6 @@ def make_cloud(node,points):
     ]
     cloud.is_bigendian = False
     cloud.point_step = 12
-    cloud.row_step = 12 * len(points)
+    cloud.row_step = 12 * len(list(points))
     cloud.data = b''.join(struct.pack('fff', x, y, z) for x, y, z in points)
     return cloud

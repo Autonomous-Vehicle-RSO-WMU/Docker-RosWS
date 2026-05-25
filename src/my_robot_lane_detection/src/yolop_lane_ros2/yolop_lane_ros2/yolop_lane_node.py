@@ -21,8 +21,10 @@ from yolop_lane_ros2.msg import LaneData
 # -----------------------------
 # YOLOP import path
 # -----------------------------
-YOLOP_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'YOLOP'))
+YOLOP_DIR = os.path.expanduser("/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP")
 sys.path.insert(0, YOLOP_DIR)
+
+print(YOLOP_DIR)
 
 from lib.config import cfg
 from lib.models import get_net
@@ -150,12 +152,12 @@ class YolopLaneNode(Node):
         # -----------------------------
         # Parameters
         # -----------------------------
-        self.declare_parameter("image_topic", "/zed/zed_node/left/image_rect_color")
+        self.declare_parameter("image_topic", "/zed/zed_node/rgb/color/rect/image")
         self.declare_parameter(
             "weights",
-            os.path.expanduser("~/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/weights/End-to-end.pth")
+            os.path.expanduser("/home/wmu_av/Desktop/Docker-RosWS/src/my_robot_lane_detection/src/YOLOP/weights/End-to-end.pth")
         )
-        self.declare_parameter("device", "cpu")
+        self.declare_parameter("device", "0")
         self.declare_parameter("img_size", 640)
 
         self.declare_parameter("roi_y_start", 0.55)
