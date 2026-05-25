@@ -17,20 +17,35 @@ import time
 
 from geometry_msgs.msg import PoseStamped
 import rclpy
+from rclpy.node import Node
 
 from nav2_simple_commander.robot_navigator import BasicNavigator, TaskResult
 
 from robot_localization.srv import FromLL
 
-def initialize_waypoints(node):
-    # Declare parameter for target waypoints (flattened array of floats: (lat1, long1, lat2, long2))
-    node.declare_parameter('target_waypoints', [0.0, 0.0, 0.0, 0.0])
-    # Get target waypoints from mission_config.yaml
-    flat_waypoints = node.get_parameter('target_waypoints').get_parameter_value().double_array_value
-    # Repackage flat array into coordinate pairs
-    target_gps_waypoints = [(flat_waypoints[i], flat_waypoints[i+1]) for i in range(0, len(flat_waypoints), 2)]
+class waypoint_params(Node):
 
-    return target_gps_waypoints
+    def __init__(self):
+        super().__init__('waypoint_parms')
+
+        print("======== START DIAGNOSTICS IN waypoint_params ========\n")
+
+        # Declare parameter for target waypoints with fallback (flattened array of floats: (lat1, long1, lat2, long2))
+        self.declare_parameter('target_waypoints', [0.0, 0.0, 0.0, 0.0])
+
+        # Retrieve target waypoints from mission_config.yaml
+        self.flat_waypoints = self.get_parameter('target_waypoints').get_parameter_value().double_array_value
+        print("self.flat_waypoints: ", self.flat_waypoints , "\n")
+      
+    
+    def initialize_waypoints(self):
+        
+        # Repackage flat array into coordinate pairs
+        target_gps_waypoints = [(self.flat_waypoints[i], self.flat_waypoints[i+1]) for i in range(0, len(self.flat_waypoints), 2)]
+        print("target_gps_waypoints: ", target_gps_waypoints , "\n")
+
+        print("======== END DIAGNOSTICS IN waypoint_params ========\n")
+        return target_gps_waypoints
 
 def gps_to_pose(node, target_gps_waypoints):
 
@@ -41,15 +56,19 @@ def gps_to_pose(node, target_gps_waypoints):
 
     # Apply points to poseStamped msgs
     waypoints = []
+    i = 0
                     
     for pt in target_gps_waypoints:
+        print("======== START DIAGNOSTICS IN gps_to_pose.target_gps_waypoints ========\n")
         points_pose = PoseStamped()
         points_pose.header.frame_id = 'map'
         points_pose.header.stamp = node.get_clock().now().to_msg()
         points_pose.pose.orientation.w = 1.0  # Use "Identity" quaternion, does not matter (see goal_yaw_tolerance in nav2 config)
 
         request = FromLL.Request()
+        print("Point ", i+1, " LAT: ", pt[0], "\n")
         request.ll_point.latitude = float(pt[0])
+        print("Point ", i+1, " LON: ", pt[1], "\n")
         request.ll_point.longitude = float(pt[1])
         request.ll_point.altitude = 0.0
 
@@ -57,9 +76,21 @@ def gps_to_pose(node, target_gps_waypoints):
         rclpy.spin_until_future_complete(node, future)
         map_point = future.result().map_point
 
+        print("map.point.x for point ", i+1, " ", map_point.x, "\n")
         points_pose.pose.position.x = map_point.x
+        print("points_pose.pose.position.x for point ", i+1, " ", points_pose.pose.position.x, "\n")
+
+        print("map.point.y for point ", i+1, " ", map_point.y, "\n")
         points_pose.pose.position.y = map_point.y
+        print("points_pose.pose.position.y for point ", i+1, " ", points_pose.pose.position.y, "\n")
+
+        print("points_pose ", i+1, " ", points_pose.pose.position.x, "\n")
         waypoints.append(points_pose)
+        print("waypoints for iteration on point ", i+1, " ", waypoints, "\n")
+
+        
+        i = i+1
+        print("======== END DIAGNOSTICS IN gps_to_pose ========\n")
 
     return waypoints
 
@@ -73,12 +104,13 @@ def main():
     # ========================
     # Get GPS Target Waypoints
     # ========================
-    target_gps_waypoints = initialize_waypoints(navigator)
+    params = waypoint_params()
+    target_gps_waypoints = params.initialize_waypoints()
     
     # =====================================
     # Wait for navigation to fully activate
     # =====================================
-    navigator.waitUntilNav2Active()
+    navigator.waitUntilNav2Active(localizer='robot_localization')
 
     # ===========================
     # Translate Raw GPS waypoints

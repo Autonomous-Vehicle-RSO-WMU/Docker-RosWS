@@ -6,19 +6,16 @@ from launch_ros.actions import Node
 def generate_launch_description():
     
     # --- 1. Find Paths ---
-    package_share_dir = get_package_share_directory('my_robot_igvc_mission')
+    package_share_dir = get_package_share_directory('igvc_bot_mission')
     config_file_path = os.path.join(package_share_dir, 'config', 'mission_config.yaml')
 
     # --- 2. Define Nodes ---
     waypoint_follower = Node(
-        package='my_robot_igvc_mission',
+        package='igvc_bot_mission',
         executable='waypoint_follower',
-        name='waypoint_follower_params',
+        name='waypoint_params',
         output='screen',
-        parameters=[{
-            'waypoints_file': os.path.join(package_share_dir, 'data', 'waypoints.csv')},
-            config_file_path
-            ]
+        parameters=[config_file_path]
     )
 
     # --- 3. Return Final Launch Description ---
