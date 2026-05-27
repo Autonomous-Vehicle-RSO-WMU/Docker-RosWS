@@ -54,7 +54,7 @@ def convert_to_North_East_Down(x_prime,y_prime,details):
     H = details['camera_location'][2][0] 
     
     # theta: The downward tilt of the camera relative to the vehicle's floor
-    theta = np.radians(details['camera_verticalrotation'])
+    theta = (details['camera_verticalrotation'])
     
     # 3. Calculate Forward Distance (Relative North)
     # alpha: The pixel's angle relative to the camera center

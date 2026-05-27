@@ -1,4 +1,5 @@
 arduino_node_ros:
   ros__parameters:
-    port: '/dev/serial/by-id/usb-Arduino__www.arduino.cc__0043_55936343833351518161-if00'
+    port: '/dev/serial/by-id/usb-Arduino__www.arduino.cc__0042_14532303232351F050C0-if00'
     baudrate: 115200
+    poll_rate_hz: 50.0

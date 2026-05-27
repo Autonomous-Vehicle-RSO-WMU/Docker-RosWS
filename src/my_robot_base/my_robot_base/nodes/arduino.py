@@ -15,20 +15,27 @@ class arduino(Node):
             # --- 1. Declare Parameters ---
             self.declare_parameter('port', '/dev/serial/by-id/usb-Arduino__www.arduino.cc__0042_14532303232351F050C0-if00')
             self.declare_parameter('baudrate', 115200)
+            self.declare_parameter('poll_rate_hz', 20.0)
         
             # --- 2. Get Params Sent by Launch/Config ---
             port_name = self.get_parameter('port').get_parameter_value().string_value
             baud_rate = self.get_parameter('baudrate').get_parameter_value().integer_value
+            poll_rate_hz = float(self.get_parameter('poll_rate_hz').value)
+
+            if poll_rate_hz <= 0.0:
+                raise ValueError('poll_rate_hz must be greater than 0.0')
 
             # --- 3. Initialize Serial Connection Using Params ---
             self.arduinoData = serial.Serial(port_name, baud_rate)
 
-            self.timer = self.create_timer(0.2, self.timer_callback)  # 20 Hz #TODO: This is not actually 20hz, but 5hz. Change to .05 for 20hz. 
+            self.timer = self.create_timer(1.0 / poll_rate_hz, self.timer_callback)
             self.IMUpublisher=self.create_publisher(Imu,'/imu/data',10)
             self.Magnetopublisher=self.create_publisher(MagneticField,'/imu/mag',10)
             self.gps_publisher = self.create_publisher(NavSatFix, '/gps/fix', 10)
-        def timer_callback(self): #TODO: THIS IS MISSING AN ELSE CATCH!!!!!
+            self.get_logger().info(f'Arduino polling at {poll_rate_hz:.1f} Hz on {port_name}')
+        def timer_callback(self):
                if self.arduinoData.in_waiting:
+                try:
                       line=self.arduinoData.readline().decode().strip()
                       if(', ' in line):
                         print(line)
@@ -90,6 +97,8 @@ class arduino(Node):
                         self.IMUpublisher.publish(msg)
                         self.Magnetopublisher.publish(msg2)
                         self.gps_publisher.publish(msg3)
+                except Exception as e:
+                      pass
                       
 
 def main():

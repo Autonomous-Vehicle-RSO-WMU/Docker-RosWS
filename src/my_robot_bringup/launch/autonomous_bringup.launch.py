@@ -14,26 +14,13 @@ from launch_ros.actions import Node
 def generate_launch_description():
 
     # --- 1. Find Paths ---
-    my_robot_description_share_dir = get_package_share_directory('my_robot_description')
-    my_robot_base_share_dir = get_package_share_directory('my_robot_base')
     my_robot_localization_share_dir = get_package_share_directory('my_robot_localization')
     my_robot_navigation_share_dir = get_package_share_directory('my_robot_navigation')
+    my_robot_follower_share_dir = get_package_share_directory('my_robot_igvc_mission')
 
     # --- 2. Define Launch Arguments
 
     # --- 3. Include Core Launch Files ---
-    diff_drive_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([os.path.join(
-            my_robot_description_share_dir, 'launch', 'diffdrive_physical.launch.py'
-        )])
-    )
-
-    base_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([os.path.join(
-            my_robot_base_share_dir, 'launch', 'base_launch.py'
-        )])
-    )
-
     localization_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
             my_robot_localization_share_dir, 'launch', 'gps_localization_launch.py'
@@ -47,14 +34,19 @@ def generate_launch_description():
         )]),
         launch_arguments = {'use_sim_time': 'false'}.items()
     )
+
+    follower_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([os.path.join(
+            my_robot_follower_share_dir, 'launch', 'mission_launch.py'
+        )]),
+        launch_arguments = {'use_sim_time': 'false'}.items()
+    ) 
     
 
     # --- 4. Define Nodes
 
     # --- 5. Return Final Launch Description ---
     return LaunchDescription([
-        diff_drive_launch,
-        base_launch,
         localization_launch,
         navigation_launch
     ])

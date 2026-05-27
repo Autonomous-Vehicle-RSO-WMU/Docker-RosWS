@@ -1,4 +1,4 @@
 # --- Waypoint Follower Node Parameters ---
 waypoint_params:
   ros__parameters:
-    target_waypoints: [42.7, -83.4, 42.8, -83.5] # [lat1, long1, lat2, long2, ..., latn, longn]
+    target_waypoints: [42.2547105, -85.6385014] # [lat1, long1, lat2, long2, ..., latn, longn]

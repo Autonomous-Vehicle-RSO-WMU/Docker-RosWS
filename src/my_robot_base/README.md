@@ -25,7 +25,7 @@ For low level hardware drivers & base controller nodes for the **physical** robo
 
 ### Config Files
 * `base_config.yaml`
-    * Defines the physical parameters for the serial connection (`port` & `baudrate`).
+    * Defines the physical parameters for the serial connection (`port`, `baudrate`) and the Arduino polling rate (`poll_rate_hz`).
 
 ### Source Files
 * `nodes/arduiino.py`

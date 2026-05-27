@@ -89,7 +89,7 @@ ekf_filter_node_odom:
 # do not provide some of the state variables estimated by the filter. For example, a TwistWithCovarianceStamped message
 # has no pose information, so the first six values would be meaningless in that case. Each vector defaults to all false
 # if unspecified, effectively making this parameter required for each sensor.
-        odom0_config: [false, false, false,
+        odom0_config: [true, true, true,
                        false, false, false,
                        true,  true,  true,
                        false, false, true,
@@ -103,7 +103,7 @@ ekf_filter_node_odom:
 
 # If you have high-frequency data or are running with a low frequency parameter value, then you may want to increase
 # the size of the subscription queue so that more measurements are fused.
-        odom0_queue_size: 2
+        odom0_queue_size: 10
 
 # [ADVANCED] Large messages in ROS can exhibit strange behavior when they arrive at a high frequency. This is a result
 # of Nagle's algorithm. This option tells the ROS subscriber to use the tcpNoDelay option, which disables Nagle's
@@ -138,10 +138,10 @@ ekf_filter_node_odom:
         # imu0: imu/data
         imu0: imu/data
         imu0_config: [false, false, false,
-                      false,  false,  true,
+                      true,  true,  true,
                       false, false, false,
-                      false,  false,  false,
-                      false,  false,  false]
+                      true,  true,  true,
+                      true,  true,  true]
 
         #        [x_pos   , y_pos    , z_pos,
         #         roll    , pitch    , yaw,
@@ -151,8 +151,8 @@ ekf_filter_node_odom:
         
         imu0_nodelay: false
         imu0_differential: false
-        imu0_relative: true
-        imu0_queue_size: 7
+        imu0_relative: false
+        imu0_queue_size: 10
         imu0_pose_rejection_threshold: 0.8                 # Note the difference in parameter names
         imu0_twist_rejection_threshold: 0.8                #
         imu0_linear_acceleration_rejection_threshold: 0.8  #
@@ -241,7 +241,7 @@ ekf_filter_node_map:
 #     use_sim_time: true
 
 
-    frequency: 30.0
+    frequency: 20.0
     sensor_timeout: 0.1
     two_d_mode: true
     transform_time_offset: 0.0
@@ -261,7 +261,7 @@ ekf_filter_node_map:
     world_frame: map
 
     odom0: diff_cont/odom
-    odom0_config: [false,  false, false,
+    odom0_config: [true,  true, true,
                    false, false, false,
                    true,  true,  true,
                    false, false, true,
@@ -285,10 +285,10 @@ ekf_filter_node_map:
 #     imu0: imu/data
     imu0: imu/data
     imu0_config: [false, false, false,
-                  false,  false,  true,
+                  true,  true,  true,
                   false, false, false,
-                  false,  false,  false,
-                  false,  false,  false]
+                  true,  true,  true,
+                  true,  true,  true]
     imu0_nodelay: false
     imu0_differential: false
     imu0_relative: false
@@ -335,19 +335,17 @@ ekf_filter_node_map:
 navsat_transform:
   ros__parameters:
     #use_sim_time: true
-    frequency: 30.0
+    frequency: 20.0
     delay: 3.0
-    magnetic_declination_radians: -0.1466  # 
+    magnetic_declination_degrees: -0.0057333  # For Western.
+    #magnetic_declination_radians: -0.1466  # for Grand Rapids, MI, USA, in 2024. See http://www.magnetic-declination.com/ for your location.
     yaw_offset: 0.0  # if IMU reads 0 when facing magnetic north instead of east then set parameter to pi/2
     zero_altitude: true
     broadcast_cartesian_transform: true
     # broadcast_utm_transform: true
-    broadcast_utm_transform_as_parent_frame: true
+    #broadcast_utm_transform_as_parent_frame: true
     publish_filtered_gps: true
     use_odometry_yaw: false
-    # --- For generic testing ---
-    wait_for_datum: false
-    # --- For IGVC like waypoint testing ---
     #wait_for_datum: true  # Use datum as X: 0.0 and Y: 0.0 for map
-    #datum: [42.668056, -83.216944, 0.0] # Input starting GPS waypoint coords here
+    #datum: [42.2544444, -85.63833333333334, 0.0] # Input starting GPS waypoint coords here
         

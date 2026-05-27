@@ -16,12 +16,22 @@
 import time
 
 from geometry_msgs.msg import PoseStamped
+from nav_msgs.msg import Odometry
 import rclpy
 from rclpy.node import Node
 
 from nav2_simple_commander.robot_navigator import BasicNavigator, TaskResult
 
 from robot_localization.srv import FromLL
+
+
+class NavsatReadinessMonitor:
+
+    def __init__(self):
+        self.received_odometry_gps = False
+
+    def odometry_gps_callback(self, _msg):
+        self.received_odometry_gps = True
 
 class waypoint_params(Node):
 
@@ -54,6 +64,17 @@ def gps_to_pose(node, target_gps_waypoints):
     while not from_ll_client.wait_for_service(timeout_sec=1.0):
         node.get_logger().info('/fromLL service not available, waiting again...')
 
+    readiness_monitor = NavsatReadinessMonitor()
+    odometry_gps_sub = node.create_subscription(
+        Odometry,
+        'odometry/gps',
+        readiness_monitor.odometry_gps_callback,
+        10,
+    )
+    while rclpy.ok() and not readiness_monitor.received_odometry_gps:
+        node.get_logger().info('Waiting for odometry/gps before requesting /fromLL conversions...')
+        rclpy.spin_once(node, timeout_sec=1.0)
+
     # Apply points to poseStamped msgs
     waypoints = []
     i = 0
@@ -74,7 +95,16 @@ def gps_to_pose(node, target_gps_waypoints):
 
         future = from_ll_client.call_async(request)
         rclpy.spin_until_future_complete(node, future)
-        map_point = future.result().map_point
+        response = future.result()
+        if response is None:
+            raise RuntimeError(f'/fromLL request failed for waypoint {i + 1}')
+
+        map_point = response.map_point
+        if map_point.x == 0.0 and map_point.y == 0.0 and (request.ll_point.latitude != 0.0 or request.ll_point.longitude != 0.0):
+            raise RuntimeError(
+                f'/fromLL returned an uninitialized map point for waypoint {i + 1}. '
+                'navsat_transform is likely not ready yet.'
+            )
 
         print("map.point.x for point ", i+1, " ", map_point.x, "\n")
         points_pose.pose.position.x = map_point.x
@@ -92,6 +122,7 @@ def gps_to_pose(node, target_gps_waypoints):
         i = i+1
         print("======== END DIAGNOSTICS IN gps_to_pose ========\n")
 
+    node.destroy_subscription(odometry_gps_sub)
     return waypoints
 
 
@@ -123,7 +154,7 @@ def main():
     nav_through_poses_task = navigator.goThroughPoses(waypoints)
 
     # TODO: Hardcode specific shared and/or indvidual route behavior for each course here? Or is this different concept or should be done elsewhere
-    while not navigator.isTaskComplete(task=nav_through_poses_task) and rclpy.ok():
+    while not navigator.isTaskComplete() and rclpy.ok():
         time.sleep(1) # Doesn't halt navigation
 
     result = navigator.getResult()

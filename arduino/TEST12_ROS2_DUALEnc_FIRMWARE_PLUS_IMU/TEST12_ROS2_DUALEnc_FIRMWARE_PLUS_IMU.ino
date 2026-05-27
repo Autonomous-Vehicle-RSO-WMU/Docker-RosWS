@@ -233,48 +233,7 @@ void loop() {
 
     // 3. VELOCITY CALCULATION
     float l_vel = ((l_curr - l_prev_ticks) / TICKS_PER_RAD) / dt;
-    float r_vel = ((r_curr - r_prev_ticks) / TICKS_PER_RAD) / dt;
 
-    float l_err = l_target - l_vel;
-    float r_err = r_target - r_vel;
-
-    // 4. INTEGRAL (with Anti-Windup)
-    // We only accumulate error if we are actually trying to move.
-    if (abs(l_target) > 0.01) {
-      l_integral = constrain(l_integral + (l_err * dt), -10, 10);
-    } else { l_integral = 0; }
-    
-    if (abs(r_target) > 0.01) {
-      r_integral = constrain(r_integral + (r_err * dt), -10, 10);
-    } else { r_integral = 0; }
-
-    // 5. CONTROL OUTPUT CALCULATION
-    // Combined: Proactive (Feed-Forward) + Reactive (PI)
-    float l_out = (l_target * kV_L) + (Kp * l_err) + (Ki * l_integral);
-    float r_out = (r_target * kV_R) + (Kp * r_err) + (Ki * r_integral);
-
-    int l_pwm = PWM_NEUTRAL;
-    int r_pwm = PWM_NEUTRAL;
-   
-    Serial.print(l_curr / TICKS_PER_RAD); Serial.print(",");
-    Serial.print(r_curr / TICKS_PER_RAD); Serial.print(",");
-    Serial.print(accel_x); Serial.print(",");
-        Serial.print(accel_y); Serial.print(",");
-        Serial.print(accel_z); Serial.print(",");
-
-        Serial.print(gyro_x);  Serial.print(",");
-        Serial.print(gyro_y);  Serial.print(",");
-        Serial.print(gyro_z);  Serial.print(",");
-
-        
-        Serial.print(magn_x);  Serial.print(",");
-        Serial.print(magn_y);  Serial.print(",");
-        Serial.println(magn_z);
-       
-       
-
-    // Apply Deadband and Directional Kick
-    if (abs(l_target) > 0.01) {
       int dir = (l_target > 0) ? 1 : -1;
       l_pwm += (dir * PWM_DEADBAND) + (int)l_out;
     }
