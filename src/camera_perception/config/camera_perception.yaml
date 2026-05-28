@@ -7,7 +7,7 @@ camera_perception_node:
       camera_frame: camera_link_optical
 
     topics:
-      camera_image: /zed/zed_node/left/color/rect/image
+      camera_image: /zed/zed_node/rgb/color/rect/image
       detections2d_out: /camera/detections2d
       debug_image_out: /camera/debug_image
 

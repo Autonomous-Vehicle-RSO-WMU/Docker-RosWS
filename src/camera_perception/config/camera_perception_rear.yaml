@@ -7,7 +7,7 @@ camera_perception_node_rear:
       camera_frame: camera_link_optical_rear
 
     topics:
-      camera_image: /zed_rear/zed_node/left/image_rect_color
+      camera_image: /zed_rear/zed_node/rgb/color/rect/image
       detections2d_out: /camera_rear/detections2d
       debug_image_out: /camera_rear/debug_image
 
