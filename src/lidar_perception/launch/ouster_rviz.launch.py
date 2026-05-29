@@ -20,6 +20,7 @@ def generate_launch_description():
     udp_dest = LaunchConfiguration('udp_dest')
     azimuth_window_start = LaunchConfiguration('azimuth_window_start')
     azimuth_window_end = LaunchConfiguration('azimuth_window_end')
+    timestamp_mode = LaunchConfiguration('timestamp_mode')
     rviz_config = LaunchConfiguration('rviz_config')
 
     sensor_hostname_arg = DeclareLaunchArgument(
@@ -42,6 +43,11 @@ def generate_launch_description():
         default_value='225000',
         description='Azimuth window end in millidegrees.'
     )
+    timestamp_mode_arg = DeclareLaunchArgument(
+        'timestamp_mode',
+        default_value='TIME_FROM_ROS_TIME',
+        description='Ouster timestamp mode. ROS time keeps message stamps aligned with TF clock.'
+    )
     rviz_config_arg = DeclareLaunchArgument(
         'rviz_config',
         default_value=rviz_config_default,
@@ -55,6 +61,7 @@ def generate_launch_description():
         launch_arguments={
             'sensor_hostname': sensor_hostname,
             'udp_dest': udp_dest,
+            'timestamp_mode': timestamp_mode,
             'viz': 'false',
             'use_system_default_qos': 'true',
             'azimuth_window_start': azimuth_window_start,
@@ -114,6 +121,7 @@ def generate_launch_description():
         udp_dest_arg,
         azimuth_window_start_arg,
         azimuth_window_end_arg,
+        timestamp_mode_arg,
         rviz_config_arg,
         display_arg,
         xauthority_arg,

@@ -1,25 +1,21 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>my_robot_bringup</name>
+  <name>lane_msgs</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="cae-user@todo.todo">cae-user</maintainer>
+  <maintainer email="Charles.b.r@outlook.com">wmu_av</maintainer>
   <license>MIT</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>rosidl_default_generators</buildtool_depend>
+
+  <exec_depend>rosidl_default_runtime</exec_depend>
+  
+  <member_of_group>rosidl_interface_packages</member_of_group>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
-
-  <!-- Dependencies For sim_bringup.launch.py -->
-  <exec_depend>ament_index_python</exec_depend>
-  <exec_depend>launch</exec_depend>
-  <exec_depend>launch_ros</exec_depend>
-  <exec_depend>my_robot_description</exec_depend>
-  <exec_depend>topic_tools</exec_depend>
-  <!-- my_robot_gazebo has COLCON_IGNORE — excluded from robot build -->
-  <!-- <exec_depend>my_robot_gazebo</exec_depend> -->
 
   <export>
     <build_type>ament_cmake</build_type>

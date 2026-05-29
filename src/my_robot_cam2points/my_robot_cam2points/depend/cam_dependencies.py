@@ -22,10 +22,10 @@ details = {
 
 
 
-def cam_to_coords(details,u,v):
+def cam_to_coords(details,u,v, rear=False):
     x_prime,y_prime=camera_to_normalized(u,v,details)
    
-    NED=convert_to_North_East_Down(x_prime,y_prime,details)
+    NED=convert_to_North_East_Down(x_prime,y_prime,details, rear)
   
     return(NED)
     
@@ -46,15 +46,15 @@ def camera_to_normalized(u,v,details ):
 
 
 
-def convert_to_North_East_Down(x_prime,y_prime,details):
+def convert_to_North_East_Down(x_prime,y_prime,details,rear):
 # 1. Undistort and 
     
     # 2. Camera Mounting Geometry
     # H: Height of camera lens above the ground plane
-    H = details['camera_location'][2][0] 
+    H = details['camera_location'+('_rear' if rear else '')][2][0] 
     
     # theta: The downward tilt of the camera relative to the vehicle's floor
-    theta = (details['camera_verticalrotation'])
+    theta = (details['camera_verticalrotation'+('_rear' if rear else '')])
     
     # 3. Calculate Forward Distance (Relative North)
     # alpha: The pixel's angle relative to the camera center
@@ -76,8 +76,8 @@ def convert_to_North_East_Down(x_prime,y_prime,details):
     
     # 5. Add Mounting Offsets
     # If camera_location is [x_offset, y_offset, height]
-    N = rel_north 
-    E = rel_east 
+    N = (rel_north + details["camera_location"][0][0]) if not rear else (rel_north - details["camera_location_rear"][0][0])
+    E = rel_east if rear else -rel_east
     D = H # The point is on the ground
     return([N,E,D])
 
@@ -90,7 +90,7 @@ def make_cloud(node,points):
     cloud.header.frame_id='base_link'
     cloud.header.stamp = node.get_clock().now().to_msg()
     cloud.height = 1
-    cloud.width = len(list(points))
+    cloud.width = len(list(points)[0])
     cloud.fields = [
         PointField(name='x', offset=0,  datatype=PointField.FLOAT32, count=1),
         PointField(name='y', offset=4,  datatype=PointField.FLOAT32, count=1),
@@ -99,5 +99,5 @@ def make_cloud(node,points):
     cloud.is_bigendian = False
     cloud.point_step = 12
     cloud.row_step = 12 * len(list(points))
-    cloud.data = b''.join(struct.pack('fff', x, y, z) for x, y, z in points)
+    cloud.data = b''.join(struct.pack('fff', x, y, z) for x, y, z in points)      
     return cloud

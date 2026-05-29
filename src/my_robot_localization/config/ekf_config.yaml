@@ -8,7 +8,7 @@ ekf_filter_node_odom:
 # The frequency, in Hz, at which the filter will output a position estimate. Note that the filter will not begin
 # computation until it receives at least one message from one of the inputs. It will then run continuously at the
 # frequency specified here, regardless of whether it receives more measurements. Defaults to 30 if unspecified.
-        frequency: 30.0
+        frequency: 15.0
 
 # The period, in seconds, after which we consider a sensor to have timed out. In this event, we carry out a predict
 # cycle on the EKF without correcting it. This parameter can be thought of as the minimum frequency with which the
@@ -241,7 +241,7 @@ ekf_filter_node_map:
 #     use_sim_time: true
 
 
-    frequency: 20.0
+    frequency: 8.0
     sensor_timeout: 0.1
     two_d_mode: true
     transform_time_offset: 0.0
@@ -335,7 +335,7 @@ ekf_filter_node_map:
 navsat_transform:
   ros__parameters:
     #use_sim_time: true
-    frequency: 20.0
+    frequency: 8.0
     delay: 3.0
     magnetic_declination_degrees: -0.0057333  # For Western.
     #magnetic_declination_radians: -0.1466  # for Grand Rapids, MI, USA, in 2024. See http://www.magnetic-declination.com/ for your location.

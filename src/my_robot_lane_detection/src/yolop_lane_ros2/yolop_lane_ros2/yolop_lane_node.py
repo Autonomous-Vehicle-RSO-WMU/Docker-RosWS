@@ -16,7 +16,7 @@ import numpy as np
 import torch
 import torchvision.transforms as transforms
 
-from yolop_lane_ros2.msg import LaneData
+from lane_msgs.msg import LaneData
 
 # -----------------------------
 # YOLOP import path

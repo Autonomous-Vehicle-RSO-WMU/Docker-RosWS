@@ -36,8 +36,8 @@ class arduino(Node):
         def timer_callback(self):
                if self.arduinoData.in_waiting:
                 try:
-                      line=self.arduinoData.readline().decode().strip()
-                      if(', ' in line):
+                    line=self.arduinoData.readline().decode().strip()
+                    if(', ' in line):
                         print(line)
                         line=line.split(', ')
                         if len(line)!=12:
@@ -46,6 +46,15 @@ class arduino(Node):
                         gyro=line[3:6]
                         magn=line[6:9]
                         gps=line[9:]
+
+                        # Ensure GPS data is in valid range before converting and publishing
+                        lat = float(gps[0]) / 1e7
+                        lon = float(gps[1]) / 1e7
+
+                        if not (-90.0 <= lat <= 90.0 and -180.0 <= lon <= 180.0):
+                            self.get_logger().warn(f"Dropping invalid GPS fix lat={lat}, lon={lon}, raw={gps}")
+                            return
+
                         print(accel,gyro,magn,gps)
                         msg=Imu()
                         msg.header.stamp = self.get_clock().now().to_msg()  # <-- timestamp
@@ -90,9 +99,9 @@ class arduino(Node):
                         msg3=NavSatFix()
                         msg3.header.stamp = self.get_clock().now().to_msg()
                         msg3.header.frame_id = "gps_link" #TODO: Don't hardcode frame here?
-                        msg3.latitude=float(gps[0])/1e7
-                        msg3.longitude=float(gps[1])/1e7
-                        msg3.altitude=float(gps[2])/1000
+                        msg3.latitude=lat
+                        msg3.longitude=lon
+                        msg3.altitude=float(gps[2]) / 1000.0
 
                         self.IMUpublisher.publish(msg)
                         self.Magnetopublisher.publish(msg2)

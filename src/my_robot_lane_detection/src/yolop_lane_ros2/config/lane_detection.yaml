@@ -1,0 +1,20 @@
+yolop_lane_node:
+  ros__parameters:
+    # HSV parameters for lane detection
+    hsv_mode: augment
+    hsv_white_v_min: 200
+
+    # Region of Interest (ROI) parameters
+    roi_y_start: 0.20
+
+    # Trapezoidal region parameters
+    trap_enable: true
+    trap_top_y: 0.1 #0.65
+    trap_top_width: 0.2
+    trap_bottom_width: 0.80
+
+    # Connected Components parameters
+    cc_min_area: 700
+
+
+#  ros2 run yolop_lane_ros2 yolop_lane_node --ros-args -p hsv_mode:=augment -p hsv_white_v_min:=200 -p roi_y_start:=0.55 -p trap_enable:=true -p trap_top_y:=0.65 -p trap_top_width:=0.2 -p trap_bottom_width:=.80 -p cc_min_area:=700

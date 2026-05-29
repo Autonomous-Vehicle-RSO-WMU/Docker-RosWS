@@ -6,7 +6,7 @@ import numpy as np
 from sensor_msgs.msg import NavSatFix,PointCloud2,PointField
 from std_msgs.msg import Float32
 from vision_msgs.msg import Detection2D
-from yolop_lane_ros2.msg import LaneData
+from lane_msgs.msg import LaneData
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
 
 #These are the functions that will be used by the node to make Camera to Coords.
@@ -63,21 +63,28 @@ class cam_coordsNode(Node):
             self.objcallback,
             qos_profile
         )
+        self.cam2dsubscriptionrear=self.create_subscription(
+            Detection2D(),
+            "/camera_rear/detections2d",
+            self.objcallback,
+            qos_profile
+        )
 
         self.camDetails={
     # details about the camera
     "camera_focal": 2.8,
     "sensor_height": 3.6,
     "sensor_width": 4.8,
-    "image_w": 1920,
-    "image_h": 1080,
+    "image_w": 640,
+    "image_h": 360,
 
     # GPS & camera positions (meters)
     "camera_location": np.array([[0.381], [0], [1.01]]),
 
-    "camera_rotation_on_mount":0 ,
     "camera_verticalrotation":0.6283,
+    "camera_location_rear": np.array([[0.381], [0], [1.01]]),
 
+    "camera_verticalrotation_rear":0.6283,
     }
       
 
@@ -92,7 +99,7 @@ class cam_coordsNode(Node):
                 v = pothole.bbox.center.position.y
                 
                 N, E, _ = cam_dependencies.cam_to_coords(self.camDetails, u, v,self.orientation[0],self.orientation[1],self.orientation[2])
-                
+            
                 angles = np.linspace(0, 2*np.pi, 8)
                 for angle in angles:
                     x = N + pothole_radius * np.cos(angle)
@@ -101,10 +108,25 @@ class cam_coordsNode(Node):
 
         cloud = cam_dependencies.make_cloud('potholecoords',potcoords)
         self.pothole_pub.publish(cloud)
-        """
-       Im just assuming its in a in32 array sorted like this
-       [[x1],[y1],[x2],[y2]]
-       """
+    def objcallback_rear(self,msg):
+        potcoords=[[],[]]
+        potholes=list(filter(lambda obj: obj.class_id=="pothole", msg.detections))
+        pothole_radius=0.6 #meters
+        if(len(potholes)>0):
+            for pothole in potholes:
+                u = pothole.bbox.center.position.x
+                v = pothole.bbox.center.position.y
+                
+                N, E, _ = cam_dependencies.cam_to_coords(self.camDetails, u, v,self.orientation[0],self.orientation[1],self.orientation[2],True)
+            
+                angles = np.linspace(0, 2*np.pi, 8)
+                for angle in angles:
+                    x = N + pothole_radius * np.cos(angle)
+                    y = E + pothole_radius * np.sin(angle)
+                    potcoords.append([x, y, 0.0])
+
+        cloud = cam_dependencies.make_cloud('potholecoords',potcoords)
+        self.pothole_pub.publish(cloud)
 
 
 
@@ -116,16 +138,17 @@ class cam_coordsNode(Node):
         N,E,_=cam_dependencies.cam_to_coords(self.camDetails,np.array(msg.left_lane_x),np.array(msg.left_lane_y))
         N2,E2,_=cam_dependencies.cam_to_coords(self.camDetails,np.array(msg.right_lane_x),np.array(msg.right_lane_y)  )
         N3,E3,_=cam_dependencies.cam_to_coords(self.camDetails,np.array(msg.center_x),np.array(msg.center_y)  )
+        
         for x in range (len(N)):
-            L[0].append(N[x]+self.camDetails.cameralocation[0][0])
+            L[0].append(N[x])
             L[1].append(-E[x])
             L[2].append(0)
         for x in range (len(N2)):
-            R[0].append(N2[x]+self.camDetails.cameralocation[0][0])
+            R[0].append(N2[x])
             R[1].append(-E2[x])
             R[2].append(0)
         for x in range (len(N3)):
-            MID[0].append(N3[x]+self.camDetails.cameralocation[0][0])
+            MID[0].append(N3[x])
             MID[1].append(-E3[x])
             MID[2].append(0)
         L= zip(L[0], L[1], L[2])
