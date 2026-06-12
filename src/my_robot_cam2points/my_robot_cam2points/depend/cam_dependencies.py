@@ -38,6 +38,8 @@ def camera_to_normalized(u,v,details ):
     cx=details["image_w"]/2
     cy=details["image_h"]/2
 
+    u = np.asarray(u, dtype=np.float32)
+    v = np.asarray(v, dtype=np.float32)
     x_prime=(u-cx)/fx
     y_prime=(v-cy)/fy
 
@@ -54,14 +56,16 @@ def convert_to_North_East_Down(x_prime,y_prime,details,rear):
     H = details['camera_location'+('_rear' if rear else '')][2][0] 
     
     # theta: The downward tilt of the camera relative to the vehicle's floor
-    theta = (details['camera_verticalrotation'+('_rear' if rear else '')])
+    theta = float(details['camera_verticalrotation'+('_rear' if rear else '')])
+    # Support either radians or degrees in configuration.
+    if abs(theta) > 2.0 * np.pi:
+        theta = np.deg2rad(theta)
     
     # 3. Calculate Forward Distance (Relative North)
     # alpha: The pixel's angle relative to the camera center
     alpha_y = np.arctan(y_prime)
-    print(theta)
-    print(alpha_y)
-    phi = theta + alpha_y
+    alpha_x = np.arctan(x_prime)
+    phi = theta - alpha_y
     
    # This is the horizontal distance from the pole to the point
     rel_north = H / np.tan(phi)
@@ -72,25 +76,36 @@ def convert_to_North_East_Down(x_prime,y_prime,details,rear):
     # But simplified: rel_east is just x_prime scaled by the distance 
     # from the lens to the vertical plane the point sits on.
     
-    rel_east = x_prime * rel_north
+    rel_east = np.tan(alpha_x) * rel_north / np.cos(alpha_y)
     
     # 5. Add Mounting Offsets
     # If camera_location is [x_offset, y_offset, height]
     N = (rel_north + details["camera_location"][0][0]) if not rear else (rel_north - details["camera_location_rear"][0][0])
     E = rel_east if rear else -rel_east
-    D = H # The point is on the ground
+    D = np.zeros_like(N) # Ground-projected points
     return([N,E,D])
 
 
 
 
 
-def make_cloud(node,points):
+def make_cloud(node,points,frame_id='base_link'):
+    points = np.asarray(points, dtype=np.float32)
+    if points.size == 0:
+        points = points.reshape((0, 3))
+    elif points.ndim == 1:
+        if points.shape[0] % 3 != 0:
+            raise ValueError('points must contain 3 values per point')
+        points = points.reshape((-1, 3))
+    elif points.ndim == 2 and points.shape[1] != 3:
+        raise ValueError('points must have shape (N, 3)')
+
+    points = np.ascontiguousarray(points, dtype=np.float32)
     cloud = PointCloud2()
-    cloud.header.frame_id='base_link'
+    cloud.header.frame_id=frame_id
     cloud.header.stamp = node.get_clock().now().to_msg()
     cloud.height = 1
-    cloud.width = len(list(points)[0])
+    cloud.width = points.shape[0]
     cloud.fields = [
         PointField(name='x', offset=0,  datatype=PointField.FLOAT32, count=1),
         PointField(name='y', offset=4,  datatype=PointField.FLOAT32, count=1),
@@ -98,6 +113,7 @@ def make_cloud(node,points):
     ]
     cloud.is_bigendian = False
     cloud.point_step = 12
-    cloud.row_step = 12 * len(list(points))
-    cloud.data = b''.join(struct.pack('fff', x, y, z) for x, y, z in points)      
+    cloud.row_step = 12 * points.shape[0]
+    cloud.data = points.tobytes()
+    cloud.is_dense = bool(np.all(np.isfinite(points)))
     return cloud

@@ -106,10 +106,11 @@ class cam_coordsNode(Node):
                     y = E + pothole_radius * np.sin(angle)
                     potcoords.append([x, y, 0.0])
 
-        cloud = cam_dependencies.make_cloud('potholecoords',potcoords)
+        cloud = cam_dependencies.make_cloud(self,np.collumn_stack(potcoords))
+        print(potholes)
         self.pothole_pub.publish(cloud)
     def objcallback_rear(self,msg):
-        potcoords=[[],[]]
+        potcoords=[[],[],[]]
         potholes=list(filter(lambda obj: obj.class_id=="pothole", msg.detections))
         pothole_radius=0.6 #meters
         if(len(potholes)>0):
@@ -123,18 +124,20 @@ class cam_coordsNode(Node):
                 for angle in angles:
                     x = N + pothole_radius * np.cos(angle)
                     y = E + pothole_radius * np.sin(angle)
-                    potcoords.append([x, y, 0.0])
+                    potcoords[0].append(x)
+                    potcoords[1].append(y)
+                    potcoords[2].append(0.0)
 
-        cloud = cam_dependencies.make_cloud('potholecoords',potcoords)
+        cloud = cam_dependencies.make_cloud(self,np.column_stack(potcoords))
         self.pothole_pub.publish(cloud)
 
 
 
      
     def camLane_callback(self,msg):
-        L=([[],[],[]])
-        R=([[],[],[]])
-        MID=([[],[],[]])
+        L=[[],[],[]]
+        R=[[],[],[]]
+        MID=[[],[],[]]
         N,E,_=cam_dependencies.cam_to_coords(self.camDetails,np.array(msg.left_lane_x),np.array(msg.left_lane_y))
         N2,E2,_=cam_dependencies.cam_to_coords(self.camDetails,np.array(msg.right_lane_x),np.array(msg.right_lane_y)  )
         N3,E3,_=cam_dependencies.cam_to_coords(self.camDetails,np.array(msg.center_x),np.array(msg.center_y)  )
@@ -151,9 +154,9 @@ class cam_coordsNode(Node):
             MID[0].append(N3[x])
             MID[1].append(-E3[x])
             MID[2].append(0)
-        L= zip(L[0], L[1], L[2])
-        R= zip(R[0], R[1], R[2]) 
-        MID= zip(MID[0], MID[1], MID[2]) 
+        L= np.column_stack((L[0],L[1],L[2]))
+        R=np.column_stack((R[0],R[1],R[2]))
+        MID=np.column_stack((MID[0],MID[1],MID[2]))
         L_cloud=cam_dependencies.make_cloud(self,L)
         R_cloud=cam_dependencies.make_cloud(self,R)
         M_cloud=cam_dependencies.make_cloud(self,MID)
